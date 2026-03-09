@@ -18,7 +18,7 @@ export default async function NotePage({ params }: PageProps) {
   }
 
   return (
-    <div className="p-4">
+    <div className="h-screen w-screen bg-sky-100">
       <Nodes notes={notes} noteEdges={noteEdges} authorId={id} />
     </div>
   );

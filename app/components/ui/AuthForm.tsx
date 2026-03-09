@@ -18,7 +18,7 @@ export default function AuthForm() {
     setLoading(true);
 
     try {
-      const endpoint = isLogin ? "/api/auth/login" : "/api/auth/signup";
+      const endpoint = isLogin ? "/api/auth/signin" : "/api/auth/signup";
       const body = isLogin ? { email, password } : { name, email, password };
 
       const res = await fetch(endpoint, {

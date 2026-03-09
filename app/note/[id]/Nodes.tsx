@@ -1,4 +1,11 @@
 "use client";
+// Polyfill for Safari
+if (typeof window !== "undefined" && !window.requestIdleCallback) {
+  window.requestIdleCallback = ((cb: IdleRequestCallback) =>
+    setTimeout(cb, 1)) as typeof window.requestIdleCallback;
+  window.cancelIdleCallback = ((id: number) =>
+    clearTimeout(id)) as typeof window.cancelIdleCallback;
+}
 
 import { useState, useCallback, useRef } from "react";
 import {
@@ -15,6 +22,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import TextUpdaterNode from "@/app/components/ui/TextUpdaterNode";
 import { Note, NoteEdge } from "@prisma/client";
+import { useRouter } from "next/navigation";
 
 const nodeTypes = {
   textUpdater: TextUpdaterNode,
@@ -156,23 +164,48 @@ export default function Nodes({
     setNodes((prev) => [...prev, newNode]);
   };
 
+  const router = useRouter();
+
   return (
-    <div style={{ width: "100vw", height: "100vh", background: "skyblue" }}>
-      <button
-        onClick={addNote}
-        className="absolute top-4 right-4 z-10 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-md cursor-pointer"
-      >
-        + Add Note
-      </button>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        nodeTypes={nodeTypes}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        fitView
-      />
+    <div className="w-full h-full bg-sky-100">
+      <div className="absolute top-4 right-4 z-10 flex gap-2">
+        <button
+          onClick={addNote}
+          className="rounded-xl bg-linear-to-r from-purple-600 to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-purple-500/20 transition-all hover:from-purple-500 hover:to-blue-500 hover:shadow-purple-500/30 cursor-pointer"
+        >
+          + Add Note
+        </button>
+
+        <button
+          onClick={() => router.push("/")}
+          className="rounded-xl bg-linear-to-r from-purple-600 to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-purple-500/20 transition-all hover:from-purple-500 hover:to-blue-500 hover:shadow-purple-500/30 cursor-pointer"
+        >
+          Logout
+        </button>
+      </div>
+      {nodes.length === 0 ? (
+        <div className="flex h-full flex-col items-center justify-center gap-4">
+          <p className="text-neutral-400">
+            No notes yet. Create your first one!
+          </p>
+          <button
+            onClick={addNote}
+            className="rounded-xl bg-linear-to-r from-purple-600 to-blue-600 px-6 py-3 font-medium text-white shadow-lg shadow-purple-500/20 transition-all hover:from-purple-500 hover:to-blue-500 cursor-pointer"
+          >
+            + Create Note
+          </button>
+        </div>
+      ) : (
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          nodeTypes={nodeTypes}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          fitView
+        />
+      )}
     </div>
   );
 }
