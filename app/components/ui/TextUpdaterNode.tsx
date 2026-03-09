@@ -50,7 +50,7 @@ export default function TextUpdaterNode({
 
   return (
     <div className="text-updater-node">
-      <div className="flex flex-col gap-2 bg-white text-black rounded-lg p-4 border border-gray-300 shadow-md min-w-[200px] max-w-[300px]">
+      <div className="flex flex-col gap-2 bg-white text-black rounded-lg p-4 border border-gray-300 shadow-md min-w-50 max-w-75">
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
