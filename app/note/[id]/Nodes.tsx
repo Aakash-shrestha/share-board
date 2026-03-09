@@ -23,6 +23,8 @@ import "@xyflow/react/dist/style.css";
 import TextUpdaterNode from "@/app/components/ui/TextUpdaterNode";
 import { Note, NoteEdge } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const nodeTypes = {
   textUpdater: TextUpdaterNode,
@@ -168,20 +170,17 @@ export default function Nodes({
 
   return (
     <div className="w-full h-full bg-sky-100">
-      <div className="absolute top-4 right-4 z-10 flex gap-2">
-        <button
-          onClick={addNote}
-          className="rounded-xl bg-linear-to-r from-purple-600 to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-purple-500/20 transition-all hover:from-purple-500 hover:to-blue-500 hover:shadow-purple-500/30 cursor-pointer"
-        >
-          + Add Note
-        </button>
-
-        <button
-          onClick={() => router.push("/")}
-          className="rounded-xl bg-linear-to-r from-purple-600 to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-purple-500/20 transition-all hover:from-purple-500 hover:to-blue-500 hover:shadow-purple-500/30 cursor-pointer"
-        >
-          Logout
-        </button>
+      <div className="absolute top-4 right-4 z-10 flex gap-2 bg-blue-500">
+        <Button onClick={addNote}>+ Add Note</Button>
+        <Button onClick={() => router.push("/")}>Logout</Button>
+        <Avatar>
+          <AvatarImage
+            src="https://github.com/shadcn.png"
+            alt="@shadcn"
+            className="grayscale"
+          />
+          <AvatarFallback>A</AvatarFallback>
+        </Avatar>
       </div>
       {nodes.length === 0 ? (
         <div className="flex h-full flex-col items-center justify-center gap-4">
