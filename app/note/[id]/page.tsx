@@ -1,26 +1,25 @@
 import { prisma } from "@/lib/prisma";
 import Nodes from "./Nodes";
-// import Editor from "./Editor";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function NotePage({ params }: PageProps) {
   const { id } = await params;
 
-  const note = await prisma.note.findUnique({
-    where: { id },
+  // Fetch all notes by this author
+  const notes = await prisma.note.findMany({
+    where: { authorId: id },
   });
 
-  if (!note) {
-    return <div>Note not found</div>;
+  if (!notes.length) {
+    return <div className="p-4">No notes found for this user.</div>;
   }
 
   return (
-    // <Editor noteId={note.id} initialContent={note.content} title={note.title} />
     <div className="p-4">
-      <Nodes />
+      <Nodes notes={notes} authorId={id} />
     </div>
   );
 }

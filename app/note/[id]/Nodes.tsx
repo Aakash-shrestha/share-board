@@ -14,31 +14,33 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import TextUpdaterNode from "@/app/components/ui/TextUpdaterNode";
+import { Note } from "@prisma/client";
+
 const nodeTypes = {
   textUpdater: TextUpdaterNode,
 };
 
-const initialNodes: Node[] = [
-  {
-    id: "n1",
-    position: { x: 0, y: 0 },
-    data: { label: "Node 1" },
+//map notes to nodes
+function notesToNodes(notes: Note[]): Node[] {
+  return notes.map((note, index) => ({
+    id: note.id,
+    position: { x: (index % 3) * 400, y: Math.floor(index / 3) * 250 },
+    data: { label: note.title, content: note.content, noteId: note.id },
     type: "textUpdater",
-  },
-  {
-    id: "n2",
-    position: { x: 0, y: 100 },
-    data: { label: "Node 2" },
-    type: "textUpdater",
-  },
-];
+  }));
+}
 
-const initialEdges: Edge[] = [{ id: "n1-n2", source: "n1", target: "n2" }];
+export default function Nodes({
+  notes,
+  authorId,
+}: {
+  notes: Note[];
+  authorId: string;
+}) {
+  const [nodes, setNodes] = useState<Node[]>(notesToNodes(notes));
+  const [edges, setEdges] = useState<Edge[]>([]);
 
-export default function Nodes() {
-  const [nodes, setNodes] = useState<Node[]>(initialNodes);
-  const [edges, setEdges] = useState<Edge[]>(initialEdges);
-
+  // default function for node based ui and stuff
   const onNodesChange = useCallback(
     (changes: NodeChange[]) =>
       setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
@@ -57,15 +59,47 @@ export default function Nodes() {
     [],
   );
 
+  //make new nodes or notes same thing
+  const addNote = async () => {
+    const res = await fetch("/api/note", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "New Note",
+        content: "",
+        authorId,
+      }),
+    });
+
+    const newNote: Note = await res.json();
+    const newNode: Node = {
+      id: newNote.id,
+      position: { x: Math.random() * 400, y: Math.random() * 400 },
+      data: {
+        label: newNote.title,
+        content: newNote.content,
+        noteId: newNote.id,
+      },
+      type: "textUpdater",
+    };
+
+    setNodes((prev) => [...prev, newNode]);
+  };
+
   return (
     <div
       style={{
         width: "100vw",
         height: "100vh",
-        background: "slategray",
-        textDecorationColor: "black",
+        background: "skyblue",
       }}
     >
+      <button
+        onClick={addNote}
+        className="absolute top-4 right-4 z-10 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-md cursor-pointer"
+      >
+        + Add Note
+      </button>
       <ReactFlow
         nodes={nodes}
         edges={edges}
