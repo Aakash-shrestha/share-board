@@ -8,10 +8,10 @@ interface PageProps {
 export default async function NotePage({ params }: PageProps) {
   const { id } = await params;
 
-  // Fetch all notes by this author
-  const notes = await prisma.note.findMany({
-    where: { authorId: id },
-  });
+  const [notes, noteEdges] = await Promise.all([
+    prisma.note.findMany({ where: { authorId: id } }),
+    prisma.noteEdge.findMany({ where: { authorId: id } }),
+  ]);
 
   if (!notes.length) {
     return <div className="p-4">No notes found for this user.</div>;
@@ -19,7 +19,7 @@ export default async function NotePage({ params }: PageProps) {
 
   return (
     <div className="p-4">
-      <Nodes notes={notes} authorId={id} />
+      <Nodes notes={notes} noteEdges={noteEdges} authorId={id} />
     </div>
   );
 }
