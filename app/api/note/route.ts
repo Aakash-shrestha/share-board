@@ -22,3 +22,21 @@ export async function POST(req: Request) {
 
   return NextResponse.json(note);
 }
+
+export async function PATCH(req: Request) {
+  const body: {
+    noteId: string;
+    title?: string;
+    content?: string;
+  } = await req.json();
+
+  const note = await prisma.note.update({
+    where: { id: body.noteId },
+    data: {
+      ...(body.title !== undefined && { title: body.title }),
+      ...(body.content !== undefined && { content: body.content }),
+    },
+  });
+
+  return NextResponse.json(note);
+}
