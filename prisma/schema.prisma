@@ -21,9 +21,22 @@ model Note {
   id        String   @id @default(uuid())
   title     String
   content   String
+  positionX Float    @default(0)
+  positionY Float    @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   authorId String
   author   User   @relation(fields: [authorId], references: [id])
+}
+
+model NoteEdge {
+  id           String  @id @default(uuid())
+  sourceId     String
+  targetId     String
+  sourceHandle String?
+  targetHandle String?
+  authorId     String
+
+  @@unique([sourceId, targetId, authorId])
 }
