@@ -34,7 +34,7 @@ export default function AuthForm() {
         return;
       }
 
-      router.push(`/note/${data.id}`);
+      router.push(`/dashboard/${data.id}`);
     } catch {
       setError("Network error. Please try again.");
     } finally {
