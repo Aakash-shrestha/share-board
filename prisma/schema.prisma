@@ -14,7 +14,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  notes Note[]
+  notes       Note[]
+  boardShares BoardShare[]
 }
 
 model Note {
@@ -39,4 +40,14 @@ model NoteEdge {
   authorId     String
 
   @@unique([sourceId, targetId, authorId])
+}
+
+model BoardShare {
+  id           String   @id @default(uuid())
+  boardOwnerId String
+  sharedWithId String
+  sharedWith   User     @relation(fields: [sharedWithId], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@unique([boardOwnerId, sharedWithId])
 }

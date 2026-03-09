@@ -170,7 +170,7 @@ export default function Nodes({
 
   return (
     <div className="w-full h-full bg-sky-100">
-      <div className="absolute top-4 right-4 z-10 flex gap-2 bg-blue-500">
+      <div className="absolute top-4 right-4 z-10 flex gap-2">
         <Button onClick={addNote}>+ Add Note</Button>
         <Button onClick={() => router.push("/")}>Logout</Button>
         <Avatar>
