@@ -20,17 +20,20 @@ const nodeTypes = {
   textUpdater: TextUpdaterNode,
 };
 
-// Map notes to nodes using saved positions
+// These are defined OUTSIDE the component — no circular dependency
 function notesToNodes(notes: Note[]): Node[] {
   return notes.map((note) => ({
     id: note.id,
     position: { x: note.positionX, y: note.positionY },
-    data: { label: note.title, content: note.content, noteId: note.id },
+    data: {
+      label: note.title,
+      content: note.content,
+      noteId: note.id,
+    },
     type: "textUpdater",
   }));
 }
 
-// Map NoteEdges to React Flow edges
 function noteEdgesToEdges(noteEdges: NoteEdge[]): Edge[] {
   return noteEdges.map((edge) => ({
     id: `${edge.sourceId}-${edge.targetId}`,
