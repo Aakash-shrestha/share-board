@@ -8,18 +8,37 @@ interface PageProps {
 export default async function NotePage({ params }: PageProps) {
   const { id } = await params;
 
-  const [notes, noteEdges] = await Promise.all([
-    prisma.note.findMany({ where: { authorId: id } }),
-    prisma.noteEdge.findMany({ where: { authorId: id } }),
+  // Check if this is a board owner or a shared user viewing someone's board
+  const user = await prisma.user.findUnique({ where: { id } });
+
+  if (!user) {
+    return <div className="p-4">User not found.</div>;
+  }
+
+  // The board owner is always the id in the URL
+  const boardOwnerId = id;
+
+  const [notes, noteEdges, shares] = await Promise.all([
+    prisma.note.findMany({ where: { authorId: boardOwnerId } }),
+    prisma.noteEdge.findMany({ where: { authorId: boardOwnerId } }),
+    prisma.boardShare.findMany({
+      where: { boardOwnerId },
+      include: {
+        sharedWith: { select: { id: true, name: true, email: true } },
+      },
+    }),
   ]);
 
-  if (!notes.length) {
-    return <div className="p-4">No notes found for this user.</div>;
-  }
+  const sharedUsers = shares.map((s) => s.sharedWith);
 
   return (
     <div className="h-screen w-screen bg-sky-100">
-      <Nodes notes={notes} noteEdges={noteEdges} authorId={id} />
+      <Nodes
+        notes={notes}
+        noteEdges={noteEdges}
+        authorId={boardOwnerId}
+        sharedUsers={sharedUsers}
+      />
     </div>
   );
 }

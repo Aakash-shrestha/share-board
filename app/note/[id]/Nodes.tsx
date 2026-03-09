@@ -7,7 +7,7 @@ if (typeof window !== "undefined" && !window.requestIdleCallback) {
     clearTimeout(id)) as typeof window.cancelIdleCallback;
 }
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   ReactFlow,
   applyNodeChanges,
@@ -21,17 +21,18 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import TextUpdaterNode from "@/app/components/ui/TextUpdaterNode";
+import ShareDialog from "@/app/components/ui/ShareDialog";
 import { Note, NoteEdge } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getSocket } from "@/lib/socket";
 
 const nodeTypes = {
   textUpdater: TextUpdaterNode,
 };
 
-// These are defined OUTSIDE the component — no circular dependency
-function notesToNodes(notes: Note[]): Node[] {
+function notesToNodes(notes: Note[], boardId: string): Node[] {
   return notes.map((note) => ({
     id: note.id,
     position: { x: note.positionX, y: note.positionY },
@@ -39,6 +40,7 @@ function notesToNodes(notes: Note[]): Node[] {
       label: note.title,
       content: note.content,
       noteId: note.id,
+      boardId,
     },
     type: "textUpdater",
   }));
@@ -54,18 +56,100 @@ function noteEdgesToEdges(noteEdges: NoteEdge[]): Edge[] {
   }));
 }
 
+interface SharedUser {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export default function Nodes({
   notes,
   noteEdges,
   authorId,
+  sharedUsers,
 }: {
   notes: Note[];
   noteEdges: NoteEdge[];
   authorId: string;
+  sharedUsers: SharedUser[];
 }) {
-  const [nodes, setNodes] = useState<Node[]>(notesToNodes(notes));
+  const [nodes, setNodes] = useState<Node[]>(notesToNodes(notes, authorId));
   const [edges, setEdges] = useState<Edge[]>(noteEdgesToEdges(noteEdges));
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isRemoteUpdate = useRef(false);
+  const router = useRouter();
+  const socket = getSocket();
+
+  // Join the board room for live collaboration
+  useEffect(() => {
+    socket.emit("join-board", authorId);
+
+    // Listen for remote node moves
+    socket.on(
+      "node-moved",
+      (data: { nodeId: string; positionX: number; positionY: number }) => {
+        isRemoteUpdate.current = true;
+        setNodes((prev) =>
+          prev.map((n) =>
+            n.id === data.nodeId
+              ? { ...n, position: { x: data.positionX, y: data.positionY } }
+              : n,
+          ),
+        );
+      },
+    );
+
+    // Listen for remote node additions
+    socket.on("node-added", (data: { node: Node }) => {
+      isRemoteUpdate.current = true;
+      setNodes((prev) => {
+        if (prev.some((n) => n.id === data.node.id)) return prev;
+        return [...prev, data.node];
+      });
+    });
+
+    // Listen for remote node edits
+    socket.on(
+      "node-edited",
+      (data: { noteId: string; title: string; content: string }) => {
+        isRemoteUpdate.current = true;
+        setNodes((prev) =>
+          prev.map((n) =>
+            n.id === data.noteId
+              ? {
+                  ...n,
+                  data: { ...n.data, label: data.title, content: data.content },
+                }
+              : n,
+          ),
+        );
+      },
+    );
+
+    // Listen for remote edge additions
+    socket.on("edge-added", (data: { edge: Edge }) => {
+      isRemoteUpdate.current = true;
+      setEdges((prev) => {
+        if (prev.some((e) => e.id === data.edge.id)) return prev;
+        return [...prev, data.edge];
+      });
+    });
+
+    // Listen for remote edge removals
+    socket.on("edge-removed", (data: { edgeId: string }) => {
+      isRemoteUpdate.current = true;
+      setEdges((prev) => prev.filter((e) => e.id !== data.edgeId));
+    });
+
+    return () => {
+      socket.emit("leave-board", authorId);
+      socket.off("node-moved");
+      socket.off("node-added");
+      socket.off("node-edited");
+      socket.off("edge-added");
+      socket.off("edge-removed");
+    };
+  }, [authorId, socket]);
 
   // Debounced save to database
   const saveLayout = useCallback(
@@ -100,39 +184,75 @@ export default function Nodes({
     (changes: NodeChange[]) =>
       setNodes((prev) => {
         const updated = applyNodeChanges(changes, prev);
+
+        // Emit position changes to other users
+        if (!isRemoteUpdate.current) {
+          for (const change of changes) {
+            if (change.type === "position" && change.position) {
+              socket.emit("node-moved", {
+                boardId: authorId,
+                nodeId: change.id,
+                positionX: change.position.x,
+                positionY: change.position.y,
+              });
+            }
+          }
+        }
+        isRemoteUpdate.current = false;
+
         setEdges((currentEdges) => {
           saveLayout(updated, currentEdges);
           return currentEdges;
         });
         return updated;
       }),
-    [saveLayout],
+    [saveLayout, authorId, socket],
   );
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) =>
       setEdges((prev) => {
         const updated = applyEdgeChanges(changes, prev);
+
+        if (!isRemoteUpdate.current) {
+          for (const change of changes) {
+            if (change.type === "remove") {
+              socket.emit("edge-removed", {
+                boardId: authorId,
+                edgeId: change.id,
+              });
+            }
+          }
+        }
+        isRemoteUpdate.current = false;
+
         setNodes((currentNodes) => {
           saveLayout(currentNodes, updated);
           return currentNodes;
         });
         return updated;
       }),
-    [saveLayout],
+    [saveLayout, authorId, socket],
   );
 
   const onConnect = useCallback(
     (params: Connection) =>
       setEdges((prev) => {
         const updated = addEdge(params, prev);
+        const newEdge = updated[updated.length - 1];
+
+        socket.emit("edge-added", {
+          boardId: authorId,
+          edge: newEdge,
+        });
+
         setNodes((currentNodes) => {
           saveLayout(currentNodes, updated);
           return currentNodes;
         });
         return updated;
       }),
-    [saveLayout],
+    [saveLayout, authorId, socket],
   );
 
   const addNote = async () => {
@@ -159,20 +279,28 @@ export default function Nodes({
         label: newNote.title,
         content: newNote.content,
         noteId: newNote.id,
+        boardId: authorId,
       },
       type: "textUpdater",
     };
 
     setNodes((prev) => [...prev, newNode]);
-  };
 
-  const router = useRouter();
+    // Notify other users
+    socket.emit("node-added", {
+      boardId: authorId,
+      node: newNode,
+    });
+  };
 
   return (
     <div className="w-full h-full bg-sky-100">
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         <Button onClick={addNote}>+ Add Note</Button>
-        <Button onClick={() => router.push("/")}>Logout</Button>
+        <ShareDialog boardOwnerId={authorId} initialSharedUsers={sharedUsers} />
+        <Button variant="outline" onClick={() => router.push("/")}>
+          Logout
+        </Button>
         <Avatar>
           <AvatarImage
             src="https://github.com/shadcn.png"
@@ -187,12 +315,7 @@ export default function Nodes({
           <p className="text-neutral-400">
             No notes yet. Create your first one!
           </p>
-          <button
-            onClick={addNote}
-            className="rounded-xl bg-linear-to-r from-purple-600 to-blue-600 px-6 py-3 font-medium text-white shadow-lg shadow-purple-500/20 transition-all hover:from-purple-500 hover:to-blue-500 cursor-pointer"
-          >
-            + Create Note
-          </button>
+          <Button onClick={addNote}>+ Create Note</Button>
         </div>
       ) : (
         <ReactFlow

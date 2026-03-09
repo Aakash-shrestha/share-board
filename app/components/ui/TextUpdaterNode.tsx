@@ -1,11 +1,12 @@
 import { Handle, Position } from "@xyflow/react";
 import { useState, useCallback } from "react";
+import { getSocket } from "@/lib/socket";
 
 interface TextUpdaterNodeData {
   label: string;
   content: string;
   noteId: string;
-  onNodeUpdate?: (noteId: string, title: string, content: string) => void;
+  boardId: string;
 }
 
 export default function TextUpdaterNode({
@@ -16,6 +17,7 @@ export default function TextUpdaterNode({
   const [title, setTitle] = useState(data.label);
   const [content, setContent] = useState(data.content);
   const [saving, setSaving] = useState(false);
+  const socket = getSocket();
 
   const save = useCallback(async () => {
     setSaving(true);
@@ -29,14 +31,20 @@ export default function TextUpdaterNode({
           content,
         }),
       });
-      // Update the node data in the parent
-      data.onNodeUpdate?.(data.noteId, title, content);
+
+      // Notify other users about the edit
+      socket.emit("node-edited", {
+        boardId: data.boardId,
+        noteId: data.noteId,
+        title,
+        content,
+      });
     } catch (err) {
       console.error("Failed to save note:", err);
     } finally {
       setSaving(false);
     }
-  }, [data, title, content]);
+  }, [data.noteId, title, content, socket]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
