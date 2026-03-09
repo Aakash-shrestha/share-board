@@ -46,7 +46,7 @@ export default function AuthForm() {
     <div className="w-full max-w-md">
       {/* Header */}
       <div className="mb-8 text-center">
-        <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 text-2xl font-bold shadow-lg shadow-purple-500/20">
+        <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-purple-500 to-blue-500 text-2xl font-bold shadow-lg shadow-purple-500/20">
           S
         </div>
         <h1 className="text-3xl font-bold tracking-tight">
@@ -133,7 +133,7 @@ export default function AuthForm() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-1 flex h-12 items-center justify-center rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 font-medium text-white shadow-lg shadow-purple-500/20 transition-all hover:from-purple-500 hover:to-blue-500 hover:shadow-purple-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-1 flex h-12 items-center justify-center rounded-xl bg-linear-to-r from-purple-600 to-blue-600 font-medium text-white shadow-lg shadow-purple-500/20 transition-all hover:from-purple-500 hover:to-blue-500 hover:shadow-purple-500/30 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
