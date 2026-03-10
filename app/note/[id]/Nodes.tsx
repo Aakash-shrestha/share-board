@@ -363,12 +363,13 @@ export default function Nodes({
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           fitView
+          proOptions={{ hideAttribution: true }}
         >
           <Background
             variant={BackgroundVariant.Dots}
             gap={20}
             size={1.5}
-            color="gray-400"
+            color="#798596"
           />
         </ReactFlow>
       )}
