@@ -144,7 +144,7 @@ export default function Nodes({
 
     //Listen for remote image uploads
     socket.on(
-      "node-image-uploaded",
+      "node-image-updated",
       (data: { noteId: string; imageUrl: string }) => {
         setNodes((prev) =>
           prev.map((n) =>
