@@ -86,11 +86,7 @@ export default function ShareDialog({
   };
 
   if (!open) {
-    return (
-      <Button variant="outline" onClick={() => setOpen(true)}>
-        Share
-      </Button>
-    );
+    return <Button onClick={() => setOpen(true)}>Share</Button>;
   }
 
   return (

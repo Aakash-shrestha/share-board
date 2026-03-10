@@ -1,5 +1,5 @@
 import { Handle, Position } from "@xyflow/react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { getSocket } from "@/lib/socket";
 
 interface TextUpdaterNodeData {
@@ -18,6 +18,15 @@ export default function TextUpdaterNode({
   const [content, setContent] = useState(data.content);
   const [saving, setSaving] = useState(false);
   const socket = getSocket();
+
+  // Sync local state when remote updates come in
+  useEffect(() => {
+    setTitle(data.label);
+  }, [data.label]);
+
+  useEffect(() => {
+    setContent(data.content);
+  }, [data.content]);
 
   const save = useCallback(async () => {
     setSaving(true);

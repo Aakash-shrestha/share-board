@@ -298,9 +298,7 @@ export default function Nodes({
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         <Button onClick={addNote}>+ Add Note</Button>
         <ShareDialog boardOwnerId={authorId} initialSharedUsers={sharedUsers} />
-        <Button variant="outline" onClick={() => router.push("/")}>
-          Logout
-        </Button>
+        <Button onClick={() => router.push("/")}>Logout</Button>
         <Avatar>
           <AvatarImage
             src="https://github.com/shadcn.png"

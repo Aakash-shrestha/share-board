@@ -39,7 +39,7 @@ export default async function DashboardPage({ params }: PageProps) {
       <header className="border-b border-neutral-800 bg-neutral-900/80 px-8 py-4 backdrop-blur-md">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 text-sm font-bold">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-purple-500 to-blue-500 text-sm font-bold">
               S
             </div>
             <span className="font-semibold tracking-tight">ShareBoard</span>
@@ -73,7 +73,7 @@ export default async function DashboardPage({ params }: PageProps) {
               {myNoteCount} {myNoteCount === 1 ? "note" : "notes"}
             </p>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-sm font-bold">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-purple-500 to-blue-500 text-sm font-bold">
             {user.name.charAt(0).toUpperCase()}
           </div>
         </Link>
@@ -102,7 +102,7 @@ export default async function DashboardPage({ params }: PageProps) {
                   </p>
                   <p className="mt-1 text-sm text-neutral-400">{owner.email}</p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-sm font-bold">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-cyan-500 text-sm font-bold">
                   {owner.name.charAt(0).toUpperCase()}
                 </div>
               </Link>
