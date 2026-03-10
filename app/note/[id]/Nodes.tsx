@@ -21,6 +21,15 @@ import {
   Background,
   BackgroundVariant,
 } from "@xyflow/react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import "@xyflow/react/dist/style.css";
 import TextUpdaterNode from "@/app/components/ui/TextUpdaterNode";
 import ShareDialog from "@/app/components/ui/ShareDialog";
@@ -337,15 +346,39 @@ export default function Nodes({
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         <Button onClick={addNote}>+ Add Note</Button>
         <ShareDialog boardOwnerId={authorId} initialSharedUsers={sharedUsers} />
-        <Button onClick={() => router.push("/")}>Logout</Button>
-        <Avatar>
-          <AvatarImage
-            src="https://github.com/shadcn.png"
-            alt="@shadcn"
-            className="grayscale"
-          />
-          <AvatarFallback>A</AvatarFallback>
-        </Avatar>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="cursor-pointer rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring">
+              <Avatar>
+                <AvatarImage
+                  src="https://github.com/shadcn.png"
+                  alt="@shadcn"
+                  className="grayscale"
+                />
+                <AvatarFallback>A</AvatarFallback>
+              </Avatar>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => router.push(`/dashboard/${authorId}`)}
+            >
+              Dashboard
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/profile")}>
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => router.push("/")}
+            >
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       {nodes.length === 0 ? (
         <div className="flex h-full flex-col items-center justify-center gap-4 bg-[radial-gradient(circle,#d1d5db_1px,transparent_1px)] bg-size-[20px_20px]">

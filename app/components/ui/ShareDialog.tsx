@@ -2,6 +2,14 @@
 
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface SharedUser {
   id: string;
@@ -22,7 +30,6 @@ export default function ShareDialog({
   boardOwnerId: string;
   initialSharedUsers: SharedUser[];
 }) {
-  const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [sharedUsers, setSharedUsers] =
@@ -85,94 +92,95 @@ export default function ShareDialog({
     setSharedUsers((prev) => prev.filter((u) => u.id !== userId));
   };
 
-  if (!open) {
-    return <Button onClick={() => setOpen(true)}>Share</Button>;
-  }
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-neutral-900">
-            Share Board
-          </h2>
-          <button
-            onClick={() => setOpen(false)}
-            className="text-neutral-400 hover:text-neutral-600 cursor-pointer text-xl leading-none"
-          >
-            ✕
-          </button>
-        </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button>Share</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-80 p-3">
+        <DropdownMenuLabel className="text-base font-semibold text-neutral-900">
+          Share Board
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
 
-        {/* Search */}
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => searchUsers(e.target.value)}
-          placeholder="Search by email..."
-          className="w-full rounded-xl border border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50"
-        />
+        {/* Search — prevent menu close on interaction */}
+        <div className="px-1 py-2">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => searchUsers(e.target.value)}
+            onKeyDown={(e) => e.stopPropagation()}
+            placeholder="Search by email..."
+            className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50"
+          />
+        </div>
 
         {/* Search results */}
         {results.length > 0 && (
-          <div className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-neutral-200 bg-white">
-            {results.map((user) => (
-              <button
-                key={user.id}
-                onClick={() => shareWith(user.email)}
-                disabled={loading || sharedUsers.some((s) => s.id === user.id)}
-                className="flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-neutral-50 disabled:opacity-50 cursor-pointer border-b border-neutral-100 last:border-0"
-              >
-                <div>
-                  <p className="font-medium text-neutral-900">{user.name}</p>
-                  <p className="text-neutral-500">{user.email}</p>
-                </div>
-                {sharedUsers.some((s) => s.id === user.id) ? (
-                  <span className="text-xs text-green-600">Shared</span>
-                ) : (
-                  <span className="text-xs text-blue-600">+ Add</span>
-                )}
-              </button>
-            ))}
+          <div className="max-h-40 overflow-y-auto">
+            {results.map((user) => {
+              const alreadyShared = sharedUsers.some((s) => s.id === user.id);
+              return (
+                <DropdownMenuItem
+                  key={user.id}
+                  disabled={loading || alreadyShared}
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    if (!alreadyShared) shareWith(user.email);
+                  }}
+                  className="flex items-center justify-between cursor-pointer"
+                >
+                  <div>
+                    <p className="font-medium text-neutral-900">{user.name}</p>
+                    <p className="text-xs text-neutral-500">{user.email}</p>
+                  </div>
+                  {alreadyShared ? (
+                    <span className="text-xs text-green-600">Shared</span>
+                  ) : (
+                    <span className="text-xs text-blue-600">+ Add</span>
+                  )}
+                </DropdownMenuItem>
+              );
+            })}
           </div>
         )}
 
-        {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+        {error && <p className="px-1 py-1 text-sm text-red-500">{error}</p>}
 
         {/* Shared users list */}
-        <div className="mt-4">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-400">
-            Shared with
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-[10px] font-medium uppercase tracking-wide text-neutral-400">
+          Shared with
+        </DropdownMenuLabel>
+
+        {sharedUsers.length === 0 ? (
+          <p className="px-2 py-2 text-sm text-neutral-400">
+            Not shared with anyone yet
           </p>
-          {sharedUsers.length === 0 ? (
-            <p className="text-sm text-neutral-400">
-              Not shared with anyone yet
-            </p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {sharedUsers.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-neutral-900">
-                      {user.name}
-                    </p>
-                    <p className="text-xs text-neutral-500">{user.email}</p>
-                  </div>
-                  <button
-                    onClick={() => removeShare(user.id)}
-                    className="text-xs text-red-500 hover:text-red-700 cursor-pointer"
-                  >
-                    Remove
-                  </button>
+        ) : (
+          <div className="flex flex-col gap-1 py-1">
+            {sharedUsers.map((user) => (
+              <div
+                key={user.id}
+                className="flex items-center justify-between rounded-md bg-neutral-50 px-2 py-1.5"
+              >
+                <div>
+                  <p className="text-sm font-medium text-neutral-900">
+                    {user.name}
+                  </p>
+                  <p className="text-xs text-neutral-500">{user.email}</p>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+                <button
+                  onClick={() => removeShare(user.id)}
+                  className="text-xs text-red-500 hover:text-red-700 cursor-pointer"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
