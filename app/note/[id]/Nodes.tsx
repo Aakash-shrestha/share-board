@@ -18,6 +18,8 @@ import {
   type Connection,
   type Node,
   type Edge,
+  Background,
+  BackgroundVariant,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import TextUpdaterNode from "@/app/components/ui/TextUpdaterNode";
@@ -169,7 +171,7 @@ export default function Nodes({
         setNodes((prev) =>
           prev.map((n) =>
             n.id === data.noteId
-              ? { ...n, data: { ...n.data, imageUrl: data.imageUrl } }
+              ? { ...n, data: { ...n.data, imageUrl: null } }
               : n,
           ),
         );
@@ -182,6 +184,8 @@ export default function Nodes({
       socket.off("node-edited");
       socket.off("edge-added");
       socket.off("edge-removed");
+      socket.off("node-image-updated");
+      socket.off("node-image-removed");
     };
   }, [authorId, socket]);
 
@@ -329,7 +333,7 @@ export default function Nodes({
   };
 
   return (
-    <div className="w-full h-full bg-sky-100">
+    <div className="w-full h-full bg-white">
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         <Button onClick={addNote}>+ Add Note</Button>
         <ShareDialog boardOwnerId={authorId} initialSharedUsers={sharedUsers} />
@@ -344,7 +348,7 @@ export default function Nodes({
         </Avatar>
       </div>
       {nodes.length === 0 ? (
-        <div className="flex h-full flex-col items-center justify-center gap-4">
+        <div className="flex h-full flex-col items-center justify-center gap-4 bg-[radial-gradient(circle,#d1d5db_1px,transparent_1px)] bg-size-[20px_20px]">
           <p className="text-neutral-400">
             No notes yet. Create your first one!
           </p>
@@ -359,7 +363,14 @@ export default function Nodes({
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           fitView
-        />
+        >
+          <Background
+            variant={BackgroundVariant.Dots}
+            gap={20}
+            size={1.5}
+            color="gray-400"
+          />
+        </ReactFlow>
       )}
     </div>
   );
