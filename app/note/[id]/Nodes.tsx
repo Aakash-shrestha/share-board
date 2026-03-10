@@ -39,6 +39,7 @@ function notesToNodes(notes: Note[], boardId: string): Node[] {
     data: {
       label: note.title,
       content: note.content,
+      imageUrl: note.imageUrl || null,
       noteId: note.id,
       boardId,
     },
@@ -141,6 +142,39 @@ export default function Nodes({
       setEdges((prev) => prev.filter((e) => e.id !== data.edgeId));
     });
 
+    //Listen for remote image uploads
+    socket.on(
+      "node-image-uploaded",
+      (data: { noteId: string; imageUrl: string }) => {
+        setNodes((prev) =>
+          prev.map((n) =>
+            n.id === data.noteId
+              ? {
+                  ...n,
+                  data: {
+                    ...n.data,
+                    imageUrl: data.imageUrl,
+                  },
+                }
+              : n,
+          ),
+        );
+      },
+    );
+
+    //listen for remote image removals
+    socket.on(
+      "node-image-removed",
+      (data: { noteId: string; imageUrl: string }) => {
+        setNodes((prev) =>
+          prev.map((n) =>
+            n.id === data.noteId
+              ? { ...n, data: { ...n.data, imageUrl: data.imageUrl } }
+              : n,
+          ),
+        );
+      },
+    );
     return () => {
       socket.emit("leave-board", authorId);
       socket.off("node-moved");
@@ -278,6 +312,7 @@ export default function Nodes({
       data: {
         label: newNote.title,
         content: newNote.content,
+        imageUrl: null,
         noteId: newNote.id,
         boardId: authorId,
       },

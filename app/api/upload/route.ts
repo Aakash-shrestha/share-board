@@ -64,22 +64,18 @@ export async function POST(req: Request) {
   }
 }
 
-
 export async function DELETE(req: Request) {
   try {
     const body: { noteId: string } = await req.json();
     const note = await prisma.note.update({
       where: { id: body.noteId },
-      data: { imageUrl: null };
-    }
-    )
-    return NextResponse.json(
-      {success: true, note}
-    )
+      data: { imageUrl: null },
+    });
+    return NextResponse.json({ success: true, note });
   } catch {
     return NextResponse.json(
       { error: "Failed to remove Image" },
-      {status: 500}
-    )
+      { status: 500 },
+    );
   }
 }

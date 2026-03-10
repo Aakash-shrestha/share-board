@@ -49,6 +49,14 @@ io.on("connection", (socket) => {
     socket.to(data.boardId).emit("edge-removed", data);
   });
 
+  socket.on("node-image-updated", (data) => {
+    socket.to(data.boardId).emit("node-image-updated", data);
+  });
+
+  socket.on("node-image-removed", (data) => {
+    socket.to(data.boardId).emit("node-image-removed", data);
+  });
+
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
   });
