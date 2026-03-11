@@ -5,7 +5,7 @@ export async function POST(req: Request) {
   const body: {
     title: string;
     content: string;
-    authorId: string;
+    boardId: string;
     positionX?: number;
     positionY?: number;
   } = await req.json();
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     data: {
       title: body.title,
       content: body.content,
-      authorId: body.authorId,
+      boardId: body.boardId,
       positionX: body.positionX ?? 0,
       positionY: body.positionY ?? 0,
     },

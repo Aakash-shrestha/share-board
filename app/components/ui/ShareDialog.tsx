@@ -24,9 +24,11 @@ interface SearchResult {
 }
 
 export default function ShareDialog({
+  boardId,
   boardOwnerId,
   initialSharedUsers,
 }: {
+  boardId: string;
   boardOwnerId: string;
   initialSharedUsers: SharedUser[];
 }) {
@@ -60,7 +62,7 @@ export default function ShareDialog({
       const res = await fetch("/api/share", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ boardOwnerId, sharedWithEmail: email }),
+        body: JSON.stringify({ boardId, sharedWithEmail: email }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -85,7 +87,7 @@ export default function ShareDialog({
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        boardOwnerId,
+        boardId,
         sharedWithId: userId,
       }),
     });

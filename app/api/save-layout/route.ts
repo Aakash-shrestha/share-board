@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   const body: {
-    authorId: string;
+    boardId: string;
     nodes: { id: string; positionX: number; positionY: number }[];
     edges: {
       sourceId: string;
@@ -13,7 +13,6 @@ export async function POST(req: Request) {
     }[];
   } = await req.json();
 
-  // Update all node positions
   const nodeUpdates = body.nodes.map((node) =>
     prisma.note.update({
       where: { id: node.id },
@@ -24,9 +23,8 @@ export async function POST(req: Request) {
     }),
   );
 
-  // Delete old edges for this author, then recreate
   const deleteEdges = prisma.noteEdge.deleteMany({
-    where: { authorId: body.authorId },
+    where: { boardId: body.boardId },
   });
 
   const createEdges = prisma.noteEdge.createMany({
@@ -35,7 +33,7 @@ export async function POST(req: Request) {
       targetId: edge.targetId,
       sourceHandle: edge.sourceHandle ?? null,
       targetHandle: edge.targetHandle ?? null,
-      authorId: body.authorId,
+      boardId: body.boardId,
     })),
   });
 

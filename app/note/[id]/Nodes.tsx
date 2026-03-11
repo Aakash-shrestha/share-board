@@ -79,15 +79,17 @@ interface SharedUser {
 export default function Nodes({
   notes,
   noteEdges,
-  authorId,
+  boardId,
+  boardOwnerId,
   sharedUsers,
 }: {
   notes: Note[];
   noteEdges: NoteEdge[];
-  authorId: string;
+  boardId: string;
+  boardOwnerId: string;
   sharedUsers: SharedUser[];
 }) {
-  const [nodes, setNodes] = useState<Node[]>(notesToNodes(notes, authorId));
+  const [nodes, setNodes] = useState<Node[]>(notesToNodes(notes, boardId));
   const [edges, setEdges] = useState<Edge[]>(noteEdgesToEdges(noteEdges));
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRemoteUpdate = useRef(false);
@@ -96,9 +98,8 @@ export default function Nodes({
 
   // Join the board room for live collaboration
   useEffect(() => {
-    socket.emit("join-board", authorId);
+    socket.emit("join-board", boardId);
 
-    // Listen for remote node moves
     socket.on(
       "node-moved",
       (data: { nodeId: string; positionX: number; positionY: number }) => {
@@ -113,7 +114,6 @@ export default function Nodes({
       },
     );
 
-    // Listen for remote node additions
     socket.on("node-added", (data: { node: Node }) => {
       isRemoteUpdate.current = true;
       setNodes((prev) => {
@@ -122,7 +122,6 @@ export default function Nodes({
       });
     });
 
-    // Listen for remote node edits
     socket.on(
       "node-edited",
       (data: { noteId: string; title: string; content: string }) => {
@@ -140,7 +139,6 @@ export default function Nodes({
       },
     );
 
-    //listen for remote node deletions
     socket.on("node-deleted", (data: { noteId: string }) => {
       isRemoteUpdate.current = true;
       setNodes((prev) => prev.filter((n) => n.id !== data.noteId));
@@ -151,7 +149,6 @@ export default function Nodes({
       );
     });
 
-    // Listen for remote edge additions
     socket.on("edge-added", (data: { edge: Edge }) => {
       isRemoteUpdate.current = true;
       setEdges((prev) => {
@@ -160,57 +157,46 @@ export default function Nodes({
       });
     });
 
-    // Listen for remote edge removals
     socket.on("edge-removed", (data: { edgeId: string }) => {
       isRemoteUpdate.current = true;
       setEdges((prev) => prev.filter((e) => e.id !== data.edgeId));
     });
 
-    //Listen for remote image uploads
     socket.on(
       "node-image-updated",
       (data: { noteId: string; imageUrl: string }) => {
         setNodes((prev) =>
           prev.map((n) =>
             n.id === data.noteId
-              ? {
-                  ...n,
-                  data: {
-                    ...n.data,
-                    imageUrl: data.imageUrl,
-                  },
-                }
+              ? { ...n, data: { ...n.data, imageUrl: data.imageUrl } }
               : n,
           ),
         );
       },
     );
 
-    //listen for remote image removals
-    socket.on(
-      "node-image-removed",
-      (data: { noteId: string; imageUrl: string }) => {
-        setNodes((prev) =>
-          prev.map((n) =>
-            n.id === data.noteId
-              ? { ...n, data: { ...n.data, imageUrl: null } }
-              : n,
-          ),
-        );
-      },
-    );
+    socket.on("node-image-removed", (data: { noteId: string }) => {
+      setNodes((prev) =>
+        prev.map((n) =>
+          n.id === data.noteId
+            ? { ...n, data: { ...n.data, imageUrl: null } }
+            : n,
+        ),
+      );
+    });
+
     return () => {
-      socket.emit("leave-board", authorId);
+      socket.emit("leave-board", boardId);
       socket.off("node-moved");
       socket.off("node-added");
       socket.off("node-edited");
-      socket.off("note-removed");
+      socket.off("node-deleted");
       socket.off("edge-added");
       socket.off("edge-removed");
       socket.off("node-image-updated");
       socket.off("node-image-removed");
     };
-  }, [authorId, socket]);
+  }, [boardId, socket]);
 
   // Debounced save to database
   const saveLayout = useCallback(
@@ -222,7 +208,7 @@ export default function Nodes({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            authorId,
+            boardId,
             nodes: currentNodes.map((n) => ({
               id: n.id,
               positionX: n.position.x,
@@ -238,7 +224,7 @@ export default function Nodes({
         });
       }, 500);
     },
-    [authorId],
+    [boardId],
   );
 
   const onNodesChange = useCallback(
@@ -250,29 +236,25 @@ export default function Nodes({
           for (const change of changes) {
             if (change.type === "position" && change.position) {
               socket.emit("node-moved", {
-                boardId: authorId,
+                boardId,
                 nodeId: change.id,
                 positionX: change.position.x,
                 positionY: change.position.y,
               });
             }
 
-            // Handle node deletion
             if (change.type === "remove") {
-              // Delete note from DB and clean up edges
               fetch("/api/note", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ noteId: change.id }),
               });
 
-              // Notify other users
               socket.emit("node-deleted", {
-                boardId: authorId,
+                boardId,
                 noteId: change.id,
               });
 
-              // Remove connected edges locally
               setEdges((prevEdges) =>
                 prevEdges.filter(
                   (e) => e.source !== change.id && e.target !== change.id,
@@ -289,7 +271,7 @@ export default function Nodes({
         });
         return updated;
       }),
-    [saveLayout, authorId, socket],
+    [saveLayout, boardId, socket],
   );
 
   const onEdgesChange = useCallback(
@@ -301,7 +283,7 @@ export default function Nodes({
           for (const change of changes) {
             if (change.type === "remove") {
               socket.emit("edge-removed", {
-                boardId: authorId,
+                boardId,
                 edgeId: change.id,
               });
             }
@@ -315,7 +297,7 @@ export default function Nodes({
         });
         return updated;
       }),
-    [saveLayout, authorId, socket],
+    [saveLayout, boardId, socket],
   );
 
   const onConnect = useCallback(
@@ -325,7 +307,7 @@ export default function Nodes({
         const newEdge = updated[updated.length - 1];
 
         socket.emit("edge-added", {
-          boardId: authorId,
+          boardId,
           edge: newEdge,
         });
 
@@ -335,7 +317,7 @@ export default function Nodes({
         });
         return updated;
       }),
-    [saveLayout, authorId, socket],
+    [saveLayout, boardId, socket],
   );
 
   const onReconnect = useCallback(
@@ -343,21 +325,18 @@ export default function Nodes({
       setEdges((prev) => {
         const updated = reconnectEdge(oldEdge, newConnection, prev);
 
-        // If the edge was actually changed, notify others
         if (!isRemoteUpdate.current) {
-          // Remove old edge
           socket.emit("edge-removed", {
-            boardId: authorId,
+            boardId,
             edgeId: oldEdge.id,
           });
 
-          // Add the new edge
           const newEdge =
             updated.find(
               (e) => e.id !== oldEdge.id && !prev.some((p) => p.id === e.id),
             ) || updated[updated.length - 1];
           socket.emit("edge-added", {
-            boardId: authorId,
+            boardId,
             edge: newEdge,
           });
         }
@@ -368,7 +347,7 @@ export default function Nodes({
         });
         return updated;
       }),
-    [saveLayout, authorId, socket],
+    [saveLayout, boardId, socket],
   );
 
   const addNote = async () => {
@@ -381,7 +360,7 @@ export default function Nodes({
       body: JSON.stringify({
         title: "New Note",
         content: "",
-        authorId,
+        boardId,
         positionX,
         positionY,
       }),
@@ -396,16 +375,15 @@ export default function Nodes({
         content: newNote.content,
         imageUrl: null,
         noteId: newNote.id,
-        boardId: authorId,
+        boardId,
       },
       type: "textUpdater",
     };
 
     setNodes((prev) => [...prev, newNode]);
 
-    // Notify other users
     socket.emit("node-added", {
-      boardId: authorId,
+      boardId,
       node: newNode,
     });
   };
@@ -414,7 +392,11 @@ export default function Nodes({
     <div className="w-full h-full bg-white">
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         <Button onClick={addNote}>+ Add Note</Button>
-        <ShareDialog boardOwnerId={authorId} initialSharedUsers={sharedUsers} />
+        <ShareDialog
+          boardId={boardId}
+          boardOwnerId={boardOwnerId}
+          initialSharedUsers={sharedUsers}
+        />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="cursor-pointer rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring">
@@ -432,7 +414,7 @@ export default function Nodes({
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => router.push(`/dashboard/${authorId}`)}
+              onClick={() => router.push(`/dashboard/${boardOwnerId}`)}
             >
               Dashboard
             </DropdownMenuItem>

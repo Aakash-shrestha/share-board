@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// Search users by email (for the share dialog)
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const query = searchParams.get("q") || "";
@@ -23,21 +22,25 @@ export async function GET(req: Request) {
   return NextResponse.json(users);
 }
 
-// Share a board with a user
 export async function POST(req: Request) {
   try {
-    const body: { boardOwnerId: string; sharedWithEmail: string } =
-      await req.json();
+    const body: { boardId: string; sharedWithEmail: string } = await req.json();
+
+    const board = await prisma.board.findUnique({
+      where: { id: body.boardId },
+    });
+    if (!board) {
+      return NextResponse.json({ error: "Board not found" }, { status: 404 });
+    }
 
     const user = await prisma.user.findUnique({
       where: { email: body.sharedWithEmail },
     });
-
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    if (user.id === body.boardOwnerId) {
+    if (user.id === board.ownerId) {
       return NextResponse.json(
         { error: "Cannot share with yourself" },
         { status: 400 },
@@ -46,8 +49,8 @@ export async function POST(req: Request) {
 
     const existing = await prisma.boardShare.findUnique({
       where: {
-        boardOwnerId_sharedWithId: {
-          boardOwnerId: body.boardOwnerId,
+        boardId_sharedWithId: {
+          boardId: body.boardId,
           sharedWithId: user.id,
         },
       },
@@ -62,7 +65,7 @@ export async function POST(req: Request) {
 
     const share = await prisma.boardShare.create({
       data: {
-        boardOwnerId: body.boardOwnerId,
+        boardId: body.boardId,
         sharedWithId: user.id,
       },
     });
@@ -76,14 +79,13 @@ export async function POST(req: Request) {
   }
 }
 
-// Remove a share
 export async function DELETE(req: Request) {
-  const body: { boardOwnerId: string; sharedWithId: string } = await req.json();
+  const body: { boardId: string; sharedWithId: string } = await req.json();
 
   await prisma.boardShare.delete({
     where: {
-      boardOwnerId_sharedWithId: {
-        boardOwnerId: body.boardOwnerId,
+      boardId_sharedWithId: {
+        boardId: body.boardId,
         sharedWithId: body.sharedWithId,
       },
     },
