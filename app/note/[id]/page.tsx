@@ -11,7 +11,7 @@ export default async function NotePage({ params }: PageProps) {
   const { id: boardId } = await params;
 
   const cookieStore = await cookies();
-  const currentUserId = cookieStore.get("userId")?.value;
+  const currentUserId = (await cookieStore.get("userId"))?.value;
 
   if (!currentUserId) {
     redirect("/");
@@ -20,6 +20,7 @@ export default async function NotePage({ params }: PageProps) {
   const board = await prisma.board.findUnique({
     where: { id: boardId },
     include: {
+      owner: { select: { id: true, name: true } },
       notes: true,
       noteEdges: true,
       boardShares: {
@@ -46,7 +47,10 @@ export default async function NotePage({ params }: PageProps) {
         notes={board.notes}
         noteEdges={board.noteEdges}
         boardId={board.id}
+        boardName={board.name}
         boardOwnerId={board.ownerId}
+        boardOwnerName={board.owner.name}
+        noteCount={board.notes.length}
         currentUserId={currentUserId}
         sharedUsers={sharedUsers}
       />

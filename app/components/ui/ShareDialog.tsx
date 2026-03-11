@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getSocket } from "@/lib/socket";
 
 interface SharedUser {
   id: string;
@@ -26,10 +27,16 @@ interface SearchResult {
 export default function ShareDialog({
   boardId,
   boardOwnerId,
+  boardName,
+  ownerName,
+  noteCount,
   initialSharedUsers,
 }: {
   boardId: string;
   boardOwnerId: string;
+  boardName: string;
+  ownerName: string;
+  noteCount: number;
   initialSharedUsers: SharedUser[];
 }) {
   const [query, setQuery] = useState("");
@@ -38,6 +45,7 @@ export default function ShareDialog({
     useState<SharedUser[]>(initialSharedUsers);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const socket = getSocket();
 
   const searchUsers = useCallback(
     async (q: string) => {
@@ -72,6 +80,19 @@ export default function ShareDialog({
       const user = results.find((r) => r.email === email);
       if (user) {
         setSharedUsers((prev) => [...prev, user]);
+
+        console.log("[ShareDialog] Emitting board-shared for user:", user.id);
+
+        // Notify the shared user's dashboard in real time
+        socket.emit("board-shared", {
+          userId: user.id,
+          board: {
+            id: boardId,
+            name: boardName,
+            ownerName: ownerName,
+            noteCount: noteCount,
+          },
+        });
       }
       setQuery("");
       setResults([]);
@@ -92,6 +113,12 @@ export default function ShareDialog({
       }),
     });
     setSharedUsers((prev) => prev.filter((u) => u.id !== userId));
+
+    // Notify the unshared user's dashboard in real time
+    socket.emit("board-unshared", {
+      userId,
+      boardId,
+    });
   };
 
   return (

@@ -46,9 +46,12 @@ export default function AuthForm() {
   return (
     <div className="w-full max-w-sm">
       <div className="mb-8 text-center">
-        <div className="mb-4 inline-flex h-10 w-10 items-center justify-center border border-border bg-primary text-lg font-bold text-primary-foreground">
+        <div className="mb-2 inline-flex h-10 w-10 items-center justify-center border border-border bg-primary text-lg font-bold text-primary-foreground">
           S
         </div>
+        <h1 className="text-xl font-extrabold tracking-tighter mb-4">
+          ShareBoard
+        </h1>
         <h1 className="text-2xl font-bold tracking-tight">
           {isLogin ? "Welcome back" : "Create account"}
         </h1>

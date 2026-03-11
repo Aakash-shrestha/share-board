@@ -13,6 +13,17 @@ const io = new Server(httpServer, {
 io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
 
+  // Join a user-specific room (for dashboard updates)
+  socket.on("join-user", (userId) => {
+    socket.join(`user:${userId}`);
+    console.log(`Socket ${socket.id} joined user room: user:${userId}`);
+  });
+
+  socket.on("leave-user", (userId) => {
+    socket.leave(`user:${userId}`);
+    console.log(`Socket ${socket.id} left user room: user:${userId}`);
+  });
+
   // Join a board room (authorId is the room)
   socket.on("join-board", (boardId) => {
     socket.join(boardId);
@@ -22,6 +33,18 @@ io.on("connection", (socket) => {
   socket.on("leave-board", (boardId) => {
     socket.leave(boardId);
     console.log(`Socket ${socket.id} left board: ${boardId}`);
+  });
+
+  // Board was shared with a user
+  socket.on("board-shared", (data) => {
+    // data: { userId, board: { id, name, ownerName, noteCount } }
+    io.to(`user:${data.userId}`).emit("board-shared", data);
+  });
+
+  // Board was unshared from a user
+  socket.on("board-unshared", (data) => {
+    // data: { userId, boardId }
+    io.to(`user:${data.userId}`).emit("board-unshared", data);
   });
 
   // Node was moved (position changed)

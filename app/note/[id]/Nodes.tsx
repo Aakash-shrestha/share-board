@@ -80,14 +80,20 @@ export default function Nodes({
   notes,
   noteEdges,
   boardId,
+  boardName,
   boardOwnerId,
+  boardOwnerName,
+  noteCount,
   currentUserId,
   sharedUsers,
 }: {
   notes: Note[];
   noteEdges: NoteEdge[];
   boardId: string;
+  boardName: string;
   boardOwnerId: string;
+  boardOwnerName: string;
+  noteCount: number;
   currentUserId: string;
   sharedUsers: SharedUser[];
 }) {
@@ -397,8 +403,12 @@ export default function Nodes({
         <ShareDialog
           boardId={boardId}
           boardOwnerId={boardOwnerId}
+          boardName={boardName}
+          ownerName={boardOwnerName}
+          noteCount={noteCount}
           initialSharedUsers={sharedUsers}
         />
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="cursor-pointer rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring">

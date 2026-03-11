@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import CreateBoardMenu from "@/app/components/ui/CreateBoardButton";
 import DeleteBoardButton from "@/app/components/ui/DeleteBoardButton";
+import SharedBoardsList from "@/app/components/ui/SharedBoardsList";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -39,6 +40,14 @@ export default async function DashboardPage({ params }: PageProps) {
       },
     },
   });
+
+  // Transform for the client component
+  const sharedBoards = sharedWithMe.map((share) => ({
+    id: share.board.id,
+    name: share.board.name,
+    ownerName: share.board.owner.name,
+    noteCount: share.board._count.notes,
+  }));
 
   return (
     <div className="relative min-h-screen bg-white">
@@ -109,35 +118,7 @@ export default async function DashboardPage({ params }: PageProps) {
         <h2 className="mb-5 text-xs font-medium uppercase tracking-widest text-muted-foreground">
           Shared with me
         </h2>
-        {sharedWithMe.length === 0 ? (
-          <div className="border border-dashed border-border p-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              No boards have been shared with you yet.
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {sharedWithMe.map((share) => (
-              <Link
-                key={share.id}
-                href={`/note/${share.board.id}`}
-                className="flex items-center justify-between border border-border bg-card px-5 py-4 transition-colors hover:bg-muted"
-              >
-                <div>
-                  <p className="text-sm font-medium">{share.board.name}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    by {share.board.owner.name} &middot;{" "}
-                    {share.board._count.notes}{" "}
-                    {share.board._count.notes === 1 ? "note" : "notes"}
-                  </p>
-                </div>
-                <div className="flex h-7 w-7 items-center justify-center bg-primary text-[10px] font-bold text-primary-foreground">
-                  {share.board.owner.name.charAt(0).toUpperCase()}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+        <SharedBoardsList userId={id} initialBoards={sharedBoards} />
       </main>
     </div>
   );
