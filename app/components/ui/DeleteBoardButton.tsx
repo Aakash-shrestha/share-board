@@ -34,7 +34,7 @@ export default function DeleteBoardButton({ boardId }: { boardId: string }) {
     <button
       onClick={deleteBoard}
       disabled={deleting}
-      className="border border-neutral-800 px-2 py-1 text-[10px] uppercase tracking-wider text-neutral-600 transition-colors hover:border-red-500/50 hover:text-red-400 disabled:opacity-50 cursor-pointer"
+      className="border border-border px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:border-foreground hover:text-foreground disabled:opacity-50 cursor-pointer"
     >
       {deleting ? "..." : "Delete"}
     </button>

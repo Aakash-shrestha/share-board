@@ -38,12 +38,10 @@ export default function CreateBoardMenu({ ownerId }: { ownerId: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="bg-red-600 text-white hover:bg-red-500">
-          + New Board
-        </Button>
+        <Button>+ New Board</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64 p-3">
-        <DropdownMenuLabel className="text-xs font-medium uppercase tracking-wider text-neutral-500">
+        <DropdownMenuLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Create Board
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -60,13 +58,13 @@ export default function CreateBoardMenu({ ownerId }: { ownerId: string }) {
               }
             }}
             placeholder="Board name..."
-            className="border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-white outline-none placeholder:text-neutral-600 focus:border-red-500"
+            className="border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground"
             autoFocus
           />
           <Button
             onClick={createBoard}
             disabled={creating || !name.trim()}
-            className="w-full bg-red-600 text-white hover:bg-red-500 disabled:opacity-50"
+            className="w-full"
           >
             {creating ? "Creating..." : "Create"}
           </Button>

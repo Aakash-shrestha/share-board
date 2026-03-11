@@ -145,7 +145,7 @@ export default function ShareDialog({
           </div>
         )}
 
-        {error && <p className="px-1 py-1 text-sm text-red-500">{error}</p>}
+        {error && <p className="px-1 py-1 text-sm text-foreground">{error}</p>}
 
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-[10px] font-medium uppercase tracking-wide text-neutral-400">
@@ -171,7 +171,7 @@ export default function ShareDialog({
                 </div>
                 <button
                   onClick={() => removeShare(user.id)}
-                  className="text-xs text-red-500 hover:text-red-700 cursor-pointer"
+                  className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   Remove
                 </button>

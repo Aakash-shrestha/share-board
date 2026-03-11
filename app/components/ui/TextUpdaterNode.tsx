@@ -142,7 +142,7 @@ export default function TextUpdaterNode({
       <div className="relative flex flex-col gap-2 bg-white text-black rounded-xl p-4 border border-gray-200 shadow-lg min-w-55 max-w-75 group">
         <button
           onClick={handleDelete}
-          className="nodrag absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 cursor-pointer shadow-md"
+          className="nodrag absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/80 cursor-pointer shadow-md"
           title="Delete note"
         >
           ✕

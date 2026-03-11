@@ -45,30 +45,27 @@ export default function AuthForm() {
 
   return (
     <div className="w-full max-w-sm">
-      {/* Header */}
       <div className="mb-8 text-center">
-        <div className="mb-4 inline-flex h-10 w-10 items-center justify-center border border-neutral-700 bg-neutral-900 text-lg font-bold text-red-500">
+        <div className="mb-4 inline-flex h-10 w-10 items-center justify-center border border-border bg-primary text-lg font-bold text-primary-foreground">
           S
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-white">
+        <h1 className="text-2xl font-bold tracking-tight">
           {isLogin ? "Welcome back" : "Create account"}
         </h1>
-        <p className="mt-2 text-xs text-neutral-500">
+        <p className="mt-2 text-xs text-muted-foreground">
           {isLogin
             ? "Sign in to access your boards"
             : "Get started with ShareBoard"}
         </p>
       </div>
 
-      {/* Form */}
-      <div className="border border-neutral-800 bg-neutral-900/60 p-6">
+      <div className="border border-border bg-card p-6 shadow-sm">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* Name (signup only) */}
           {!isLogin && (
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="name"
-                className="text-xs font-medium uppercase tracking-wider text-neutral-500"
+                className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
               >
                 Name
               </label>
@@ -79,16 +76,15 @@ export default function AuthForm() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
                 required={!isLogin}
-                className="border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-neutral-600 focus:border-red-500"
+                className="border border-input bg-background px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground"
               />
             </div>
           )}
 
-          {/* Email */}
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="email"
-              className="text-xs font-medium uppercase tracking-wider text-neutral-500"
+              className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               Email
             </label>
@@ -99,15 +95,14 @@ export default function AuthForm() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
-              className="border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-neutral-600 focus:border-red-500"
+              className="border border-input bg-background px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground"
             />
           </div>
 
-          {/* Password */}
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="password"
-              className="text-xs font-medium uppercase tracking-wider text-neutral-500"
+              className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               Password
             </label>
@@ -119,25 +114,19 @@ export default function AuthForm() {
               placeholder="••••••••"
               required
               minLength={6}
-              className="border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-neutral-600 focus:border-red-500"
+              className="border border-input bg-background px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground"
             />
           </div>
 
-          {/* Error */}
           {error && (
-            <div className="border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+            <div className="border border-border bg-muted px-3 py-2 text-xs text-foreground">
               {error}
             </div>
           )}
 
-          {/* Submit */}
-          <Button
-            type="submit"
-            disabled={loading}
-            className="mt-1 h-10 w-full bg-red-600 text-white hover:bg-red-500 disabled:opacity-50"
-          >
+          <Button type="submit" disabled={loading} className="mt-1 h-10 w-full">
             {loading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
             ) : isLogin ? (
               "Sign In"
             ) : (
@@ -146,23 +135,21 @@ export default function AuthForm() {
           </Button>
         </form>
 
-        {/* Divider */}
         <div className="my-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-neutral-800" />
-          <span className="text-[10px] uppercase tracking-widest text-neutral-600">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
             or
           </span>
-          <div className="h-px flex-1 bg-neutral-800" />
+          <div className="h-px flex-1 bg-border" />
         </div>
 
-        {/* Toggle */}
         <Button
           variant="outline"
           onClick={() => {
             setIsLogin(!isLogin);
             setError("");
           }}
-          className="w-full border-neutral-800 text-neutral-400 hover:border-neutral-600 hover:text-white"
+          className="w-full"
         >
           {isLogin
             ? "Don't have an account? Sign up"
@@ -170,8 +157,7 @@ export default function AuthForm() {
         </Button>
       </div>
 
-      {/* Footer */}
-      <p className="mt-4 text-center text-[10px] text-neutral-700">
+      <p className="mt-4 text-center text-[10px] text-muted-foreground">
         By continuing, you agree to our Terms of Service
       </p>
     </div>

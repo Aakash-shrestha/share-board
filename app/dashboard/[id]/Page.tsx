@@ -14,8 +14,8 @@ export default async function DashboardPage({ params }: PageProps) {
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-neutral-500">User not found.</p>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <p className="text-muted-foreground">User not found.</p>
       </div>
     );
   }
@@ -41,25 +41,24 @@ export default async function DashboardPage({ params }: PageProps) {
   });
 
   return (
-    <div className="relative min-h-screen">
-      {/* Dot grid background */}
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-size-[20px_20px]" />
+    <div className="relative min-h-screen bg-white">
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle,#d1d5db_1px,transparent_1px)] bg-size-[20px_20px]" />
 
-      <header className="border-b border-neutral-800/60 px-8 py-4">
+      <header className="border-b border-border px-8 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-7 w-7 items-center justify-center border border-neutral-700 text-xs font-bold text-red-500">
+            <div className="flex h-7 w-7 items-center justify-center bg-primary text-xs font-bold text-primary-foreground">
               S
             </div>
-            <span className="text-sm font-semibold tracking-tight text-white">
+            <span className="text-sm font-semibold tracking-tight">
               ShareBoard
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-xs text-neutral-500">{user.email}</span>
+            <span className="text-xs text-muted-foreground">{user.email}</span>
             <Link
               href="/"
-              className="border border-neutral-800 px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:border-neutral-600 hover:text-white"
+              className="border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
             >
               Logout
             </Link>
@@ -70,15 +69,15 @@ export default async function DashboardPage({ params }: PageProps) {
       <main className="mx-auto max-w-3xl px-8 py-10">
         {/* My Boards */}
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-xs font-medium uppercase tracking-widest text-neutral-500">
+          <h2 className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
             My Boards
           </h2>
           <CreateBoardMenu ownerId={id} />
         </div>
 
         {myBoards.length === 0 ? (
-          <div className="mb-10 border border-dashed border-neutral-800 p-8 text-center">
-            <p className="text-sm text-neutral-600">
+          <div className="mb-10 border border-dashed border-border p-8 text-center">
+            <p className="text-sm text-muted-foreground">
               No boards yet. Create one to get started.
             </p>
           </div>
@@ -87,17 +86,17 @@ export default async function DashboardPage({ params }: PageProps) {
             {myBoards.map((board) => (
               <div
                 key={board.id}
-                className="group flex items-center justify-between border border-neutral-800/60 bg-neutral-900/40 px-5 py-4 transition-colors hover:border-neutral-700 hover:bg-neutral-900/80"
+                className="group flex items-center justify-between border border-border bg-card px-5 py-4 transition-colors hover:bg-muted"
               >
                 <Link href={`/note/${board.id}`} className="flex-1">
-                  <p className="text-sm font-medium text-white">{board.name}</p>
-                  <p className="mt-0.5 text-xs text-neutral-500">
+                  <p className="text-sm font-medium">{board.name}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
                     {board._count.notes}{" "}
                     {board._count.notes === 1 ? "note" : "notes"}
                   </p>
                 </Link>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-7 w-7 items-center justify-center border border-neutral-700 text-[10px] font-bold text-red-500">
+                  <div className="flex h-7 w-7 items-center justify-center bg-primary text-[10px] font-bold text-primary-foreground">
                     {board.name.charAt(0).toUpperCase()}
                   </div>
                   <DeleteBoardButton boardId={board.id} />
@@ -107,13 +106,12 @@ export default async function DashboardPage({ params }: PageProps) {
           </div>
         )}
 
-        {/* Shared With Me */}
-        <h2 className="mb-5 text-xs font-medium uppercase tracking-widest text-neutral-500">
+        <h2 className="mb-5 text-xs font-medium uppercase tracking-widest text-muted-foreground">
           Shared with me
         </h2>
         {sharedWithMe.length === 0 ? (
-          <div className="border border-dashed border-neutral-800 p-8 text-center">
-            <p className="text-sm text-neutral-600">
+          <div className="border border-dashed border-border p-8 text-center">
+            <p className="text-sm text-muted-foreground">
               No boards have been shared with you yet.
             </p>
           </div>
@@ -123,19 +121,17 @@ export default async function DashboardPage({ params }: PageProps) {
               <Link
                 key={share.id}
                 href={`/note/${share.board.id}`}
-                className="flex items-center justify-between border border-neutral-800/60 bg-neutral-900/40 px-5 py-4 transition-colors hover:border-neutral-700 hover:bg-neutral-900/80"
+                className="flex items-center justify-between border border-border bg-card px-5 py-4 transition-colors hover:bg-muted"
               >
                 <div>
-                  <p className="text-sm font-medium text-white">
-                    {share.board.name}
-                  </p>
-                  <p className="mt-0.5 text-xs text-neutral-500">
+                  <p className="text-sm font-medium">{share.board.name}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
                     by {share.board.owner.name} &middot;{" "}
                     {share.board._count.notes}{" "}
                     {share.board._count.notes === 1 ? "note" : "notes"}
                   </p>
                 </div>
-                <div className="flex h-7 w-7 items-center justify-center border border-neutral-700 text-[10px] font-bold text-neutral-400">
+                <div className="flex h-7 w-7 items-center justify-center bg-primary text-[10px] font-bold text-primary-foreground">
                   {share.board.owner.name.charAt(0).toUpperCase()}
                 </div>
               </Link>
