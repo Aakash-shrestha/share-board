@@ -14,9 +14,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  boardShares BoardShare[]
   boards      Board[]
-  notes       Note[]
+  boardShares BoardShare[]
 }
 
 model Board {
@@ -42,10 +41,8 @@ model Note {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  authorId String
-  author   User    @relation(fields: [authorId], references: [id])
-  board    Board?  @relation(fields: [boardId], references: [id])
-  boardId  String?
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
 }
 
 model NoteEdge {
@@ -54,21 +51,20 @@ model NoteEdge {
   targetId     String
   sourceHandle String?
   targetHandle String?
-  authorId     String
-  board        Board?  @relation(fields: [boardId], references: [id])
-  boardId      String?
 
-  @@unique([sourceId, targetId, sourceHandle, targetHandle, authorId])
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, targetId, sourceHandle, targetHandle, boardId])
 }
 
 model BoardShare {
   id           String   @id @default(uuid())
-  boardOwnerId String
+  boardId      String
+  board        Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
   sharedWithId String
   sharedWith   User     @relation(fields: [sharedWithId], references: [id])
   createdAt    DateTime @default(now())
-  board        Board?   @relation(fields: [boardId], references: [id])
-  boardId      String?
 
-  @@unique([boardOwnerId, sharedWithId])
+  @@unique([boardId, sharedWithId])
 }
