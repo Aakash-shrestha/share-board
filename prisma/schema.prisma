@@ -40,7 +40,7 @@ model NoteEdge {
   targetHandle String?
   authorId     String
 
-  @@unique([sourceId, targetId, authorId])
+  @@unique([sourceId, targetId, sourceHandle, targetHandle, authorId])
 }
 
 model BoardShare {
