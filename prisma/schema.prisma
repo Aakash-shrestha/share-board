@@ -14,7 +14,21 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  boardShares BoardShare[]
+  boards      Board[]
   notes       Note[]
+}
+
+model Board {
+  id        String   @id @default(uuid())
+  name      String   @default("Untitled Board")
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notes       Note[]
+  noteEdges   NoteEdge[]
   boardShares BoardShare[]
 }
 
@@ -29,7 +43,9 @@ model Note {
   updatedAt DateTime @updatedAt
 
   authorId String
-  author   User   @relation(fields: [authorId], references: [id])
+  author   User    @relation(fields: [authorId], references: [id])
+  board    Board?  @relation(fields: [boardId], references: [id])
+  boardId  String?
 }
 
 model NoteEdge {
@@ -39,6 +55,8 @@ model NoteEdge {
   sourceHandle String?
   targetHandle String?
   authorId     String
+  board        Board?  @relation(fields: [boardId], references: [id])
+  boardId      String?
 
   @@unique([sourceId, targetId, sourceHandle, targetHandle, authorId])
 }
@@ -49,6 +67,8 @@ model BoardShare {
   sharedWithId String
   sharedWith   User     @relation(fields: [sharedWithId], references: [id])
   createdAt    DateTime @default(now())
+  board        Board?   @relation(fields: [boardId], references: [id])
+  boardId      String?
 
   @@unique([boardOwnerId, sharedWithId])
 }

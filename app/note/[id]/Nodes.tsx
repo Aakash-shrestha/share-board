@@ -21,6 +21,7 @@ import {
   Background,
   BackgroundVariant,
   reconnectEdge,
+  ConnectionMode,
 } from "@xyflow/react";
 import {
   DropdownMenu,
@@ -466,7 +467,7 @@ export default function Nodes({
           onReconnect={onReconnect}
           fitView
           proOptions={{ hideAttribution: true }}
-          connectionMode="loose"
+          connectionMode={ConnectionMode.Loose}
           edgesReconnectable
           defaultEdgeOptions={{
             selectable: true,
