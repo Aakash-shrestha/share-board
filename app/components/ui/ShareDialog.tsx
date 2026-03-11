@@ -103,7 +103,6 @@ export default function ShareDialog({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        {/* Search — prevent menu close on interaction */}
         <div className="px-1 py-2">
           <input
             type="text"
@@ -115,7 +114,6 @@ export default function ShareDialog({
           />
         </div>
 
-        {/* Search results */}
         {results.length > 0 && (
           <div className="max-h-40 overflow-y-auto">
             {results.map((user) => {
@@ -147,7 +145,6 @@ export default function ShareDialog({
 
         {error && <p className="px-1 py-1 text-sm text-red-500">{error}</p>}
 
-        {/* Shared users list */}
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-[10px] font-medium uppercase tracking-wide text-neutral-400">
           Shared with

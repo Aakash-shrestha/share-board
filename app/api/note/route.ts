@@ -40,3 +40,21 @@ export async function PATCH(req: Request) {
 
   return NextResponse.json(note);
 }
+
+export async function DELETE(req: Request) {
+  const body: { noteId: string } = await req.json();
+
+  //delete any eedges that references this note (either source or target)
+  await prisma.noteEdge.deleteMany({
+    where: {
+      OR: [{ sourceId: body.noteId }, { targetId: body.noteId }],
+    },
+  });
+
+  //delete the note
+  const note = await prisma.note.delete({
+    where: { id: body.noteId },
+  });
+
+  return NextResponse.json(note);
+}
