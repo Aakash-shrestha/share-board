@@ -1,18 +1,22 @@
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 
 export default async function NoteLayout({
   children,
-  params,
+  // params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ id: string }>;
+  // params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+  const cookieStore = await cookies();
+  const currentUserId = cookieStore.get("userId")?.value;
 
-  const user = await prisma.user.findUnique({
-    where: { id },
-    select: { name: true },
-  });
+  const user = currentUserId
+    ? await prisma.user.findUnique({
+        where: { id: currentUserId },
+        select: { name: true },
+      })
+    : null;
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-white">

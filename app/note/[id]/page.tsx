@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Nodes from "./Nodes";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -7,6 +9,13 @@ interface PageProps {
 
 export default async function NotePage({ params }: PageProps) {
   const { id: boardId } = await params;
+
+  const cookieStore = await cookies();
+  const currentUserId = cookieStore.get("userId")?.value;
+
+  if (!currentUserId) {
+    redirect("/");
+  }
 
   const board = await prisma.board.findUnique({
     where: { id: boardId },
@@ -38,6 +47,7 @@ export default async function NotePage({ params }: PageProps) {
         noteEdges={board.noteEdges}
         boardId={board.id}
         boardOwnerId={board.ownerId}
+        currentUserId={currentUserId}
         sharedUsers={sharedUsers}
       />
     </div>

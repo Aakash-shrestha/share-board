@@ -81,12 +81,14 @@ export default function Nodes({
   noteEdges,
   boardId,
   boardOwnerId,
+  currentUserId,
   sharedUsers,
 }: {
   notes: Note[];
   noteEdges: NoteEdge[];
   boardId: string;
   boardOwnerId: string;
+  currentUserId: string;
   sharedUsers: SharedUser[];
 }) {
   const [nodes, setNodes] = useState<Node[]>(notesToNodes(notes, boardId));
@@ -414,7 +416,7 @@ export default function Nodes({
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => router.push(`/dashboard/${boardOwnerId}`)}
+              onClick={() => router.push(`/dashboard/${currentUserId}`)}
             >
               Dashboard
             </DropdownMenuItem>
