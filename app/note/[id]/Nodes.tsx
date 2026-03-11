@@ -138,6 +138,17 @@ export default function Nodes({
       },
     );
 
+    //listen for remote node deletions
+    socket.on("node-deleted", (data: { noteId: string }) => {
+      isRemoteUpdate.current = true;
+      setNodes((prev) => prev.filter((n) => n.id !== data.noteId));
+      setEdges((prev) =>
+        prev.filter(
+          (e) => e.source !== data.noteId && e.target !== data.noteId,
+        ),
+      );
+    });
+
     // Listen for remote edge additions
     socket.on("edge-added", (data: { edge: Edge }) => {
       isRemoteUpdate.current = true;
@@ -191,6 +202,7 @@ export default function Nodes({
       socket.off("node-moved");
       socket.off("node-added");
       socket.off("node-edited");
+      socket.off("note-removed");
       socket.off("edge-added");
       socket.off("edge-removed");
       socket.off("node-image-updated");
@@ -232,7 +244,6 @@ export default function Nodes({
       setNodes((prev) => {
         const updated = applyNodeChanges(changes, prev);
 
-        // Emit position changes to other users
         if (!isRemoteUpdate.current) {
           for (const change of changes) {
             if (change.type === "position" && change.position) {
@@ -242,6 +253,29 @@ export default function Nodes({
                 positionX: change.position.x,
                 positionY: change.position.y,
               });
+            }
+
+            // Handle node deletion
+            if (change.type === "remove") {
+              // Delete note from DB and clean up edges
+              fetch("/api/note", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ noteId: change.id }),
+              });
+
+              // Notify other users
+              socket.emit("node-deleted", {
+                boardId: authorId,
+                noteId: change.id,
+              });
+
+              // Remove connected edges locally
+              setEdges((prevEdges) =>
+                prevEdges.filter(
+                  (e) => e.source !== change.id && e.target !== change.id,
+                ),
+              );
             }
           }
         }

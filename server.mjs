@@ -39,6 +39,11 @@ io.on("connection", (socket) => {
     socket.to(data.boardId).emit("node-edited", data);
   });
 
+  //node was deleted
+  socket.on("node-deleted", (data) => {
+    socket.to(data.boardId).emit("node-deleted", data);
+  });
+
   // Edge was added
   socket.on("edge-added", (data) => {
     socket.to(data.boardId).emit("edge-added", data);
