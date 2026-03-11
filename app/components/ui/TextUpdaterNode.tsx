@@ -1,4 +1,4 @@
-import { Handle, Position } from "@xyflow/react";
+import { Handle, Position, useReactFlow } from "@xyflow/react";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { getSocket } from "@/lib/socket";
 import Image from "next/image";
@@ -12,8 +12,10 @@ interface TextUpdaterNodeData {
 }
 
 export default function TextUpdaterNode({
+  id,
   data,
 }: {
+  id: string;
   data: TextUpdaterNodeData;
 }) {
   const [title, setTitle] = useState(data.label);
@@ -23,6 +25,11 @@ export default function TextUpdaterNode({
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const socket = getSocket();
+  const { deleteElements } = useReactFlow();
+
+  const handleDelete = useCallback(() => {
+    deleteElements({ nodes: [{ id }] });
+  }, [id, deleteElements]);
 
   // Sync local state when remote updates come in
   useEffect(() => {
@@ -132,7 +139,15 @@ export default function TextUpdaterNode({
 
   return (
     <div className="text-updater-node">
-      <div className="flex flex-col gap-2 bg-white text-black rounded-xl p-4 border border-gray-200 shadow-lg min-w-55 max-w-75">
+      <div className="relative flex flex-col gap-2 bg-white text-black rounded-xl p-4 border border-gray-200 shadow-lg min-w-55 max-w-75 group">
+        <button
+          onClick={handleDelete}
+          className="nodrag absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 cursor-pointer shadow-md"
+          title="Delete note"
+        >
+          ✕
+        </button>
+
         {/* Image */}
         {imageUrl && (
           <div className="relative -mx-4 -mt-4 mb-1">
