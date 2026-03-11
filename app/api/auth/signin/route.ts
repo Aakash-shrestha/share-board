@@ -28,11 +28,19 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       id: user.id,
       name: user.name,
       email: user.email,
     });
+
+    response.cookies.set("userId", user.id, {
+      httpOnly: true, // prevents client-side JavaScript from accessing the cookie
+      path: "/",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+    return response;
   } catch {
     return NextResponse.json(
       { error: "Internal server error" },
