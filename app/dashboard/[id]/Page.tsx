@@ -3,6 +3,7 @@ import Link from "next/link";
 import CreateBoardMenu from "@/app/components/ui/CreateBoardButton";
 import DeleteBoardButton from "@/app/components/ui/DeleteBoardButton";
 import SharedBoardsList from "@/app/components/ui/SharedBoardsList";
+import ShareDialog from "@/app/components/ui/ShareDialog";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -25,6 +26,12 @@ export default async function DashboardPage({ params }: PageProps) {
     where: { ownerId: id },
     include: {
       _count: { select: { notes: true } },
+      owner: { select: { id: true, name: true } },
+      boardShares: {
+        include: {
+          sharedWith: { select: { id: true, name: true, email: true } },
+        },
+      },
     },
     orderBy: { updatedAt: "desc" },
   });
@@ -107,6 +114,18 @@ export default async function DashboardPage({ params }: PageProps) {
                 <div className="flex items-center gap-3">
                   <div className="flex h-7 w-7 items-center justify-center bg-primary text-[10px] font-bold text-primary-foreground">
                     {board.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <ShareDialog
+                      boardId={board.id}
+                      boardOwnerId={board.ownerId}
+                      boardName={board.name}
+                      ownerName={board.owner.name}
+                      noteCount={board._count.notes}
+                      initialSharedUsers={board.boardShares.map(
+                        (s) => s.sharedWith,
+                      )}
+                    />
                   </div>
                   <DeleteBoardButton boardId={board.id} />
                 </div>
