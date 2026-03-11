@@ -44,7 +44,7 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="w-full max-w-sm">
+    <div className="w-full max-w-sm z-10">
       <div className="mb-8 text-center">
         <div className="mb-2 inline-flex h-10 w-10 items-center justify-center border border-border bg-primary text-lg font-bold text-primary-foreground">
           S
