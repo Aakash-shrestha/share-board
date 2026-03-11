@@ -232,9 +232,10 @@ export default function TextUpdaterNode({
           {saving ? "Saving..." : "Press Enter to save"}
         </span>
 
-        <Handle type="target" position={Position.Top} />
-        <Handle type="source" position={Position.Right} id="a" />
-        <Handle type="source" position={Position.Bottom} id="b" />
+        <Handle type="source" position={Position.Top} id="top" />
+        <Handle type="source" position={Position.Right} id="right" />
+        <Handle type="source" position={Position.Bottom} id="bottom" />
+        <Handle type="source" position={Position.Left} id="left" />
       </div>
     </div>
   );

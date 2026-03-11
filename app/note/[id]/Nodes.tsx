@@ -20,6 +20,7 @@ import {
   type Edge,
   Background,
   BackgroundVariant,
+  reconnectEdge,
 } from "@xyflow/react";
 import {
   DropdownMenu,
@@ -60,7 +61,7 @@ function notesToNodes(notes: Note[], boardId: string): Node[] {
 
 function noteEdgesToEdges(noteEdges: NoteEdge[]): Edge[] {
   return noteEdges.map((edge) => ({
-    id: `${edge.sourceId}-${edge.targetId}`,
+    id: `${edge.sourceId}-${edge.sourceHandle ?? "default"}-${edge.targetId}-${edge.targetHandle ?? "default"}`,
     source: edge.sourceId,
     target: edge.targetId,
     sourceHandle: edge.sourceHandle ?? undefined,
@@ -336,6 +337,39 @@ export default function Nodes({
     [saveLayout, authorId, socket],
   );
 
+  const onReconnect = useCallback(
+    (oldEdge: Edge, newConnection: Connection) =>
+      setEdges((prev) => {
+        const updated = reconnectEdge(oldEdge, newConnection, prev);
+
+        // If the edge was actually changed, notify others
+        if (!isRemoteUpdate.current) {
+          // Remove old edge
+          socket.emit("edge-removed", {
+            boardId: authorId,
+            edgeId: oldEdge.id,
+          });
+
+          // Add the new edge
+          const newEdge =
+            updated.find(
+              (e) => e.id !== oldEdge.id && !prev.some((p) => p.id === e.id),
+            ) || updated[updated.length - 1];
+          socket.emit("edge-added", {
+            boardId: authorId,
+            edge: newEdge,
+          });
+        }
+
+        setNodes((currentNodes) => {
+          saveLayout(currentNodes, updated);
+          return currentNodes;
+        });
+        return updated;
+      }),
+    [saveLayout, authorId, socket],
+  );
+
   const addNote = async () => {
     const positionX = Math.random() * 400;
     const positionY = Math.random() * 400;
@@ -429,8 +463,15 @@ export default function Nodes({
           nodeTypes={nodeTypes}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onReconnect={onReconnect}
           fitView
           proOptions={{ hideAttribution: true }}
+          connectionMode="loose"
+          edgesReconnectable
+          defaultEdgeOptions={{
+            selectable: true,
+            deletable: true,
+          }}
         >
           <Background
             variant={BackgroundVariant.Dots}
