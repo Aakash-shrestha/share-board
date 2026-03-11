@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import CreateBoardButton from "@/app/components/ui/CreateBoardButton";
+import DeleteBoardButton from "@/app/components/ui/DeleteBoardButton";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -14,24 +16,26 @@ export default async function DashboardPage({ params }: PageProps) {
     return <div className="p-4">User not found.</div>;
   }
 
+  // Get all boards owned by this user with note counts
+  const myBoards = await prisma.board.findMany({
+    where: { ownerId: id },
+    include: {
+      _count: { select: { notes: true } },
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+
   // Get boards shared with this user
   const sharedWithMe = await prisma.boardShare.findMany({
     where: { sharedWithId: id },
-    select: {
-      boardOwnerId: true,
+    include: {
+      board: {
+        include: {
+          owner: { select: { id: true, name: true, email: true } },
+          _count: { select: { notes: true } },
+        },
+      },
     },
-  });
-
-  // Get the owner details for shared boards
-  const sharedOwnerIds = sharedWithMe.map((s) => s.boardOwnerId);
-  const sharedOwners = await prisma.user.findMany({
-    where: { id: { in: sharedOwnerIds } },
-    select: { id: true, name: true, email: true },
-  });
-
-  // Count my notes
-  const myNoteCount = await prisma.note.count({
-    where: { authorId: id },
   });
 
   return (
@@ -59,30 +63,48 @@ export default async function DashboardPage({ params }: PageProps) {
       </header>
 
       <main className="mx-auto max-w-4xl px-8 py-10">
-        {/* My Board */}
-        <h2 className="mb-4 text-lg font-semibold text-neutral-300">
-          My Board
-        </h2>
-        <Link
-          href={`/note/${id}`}
-          className="mb-10 flex items-center justify-between rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 transition-all hover:border-purple-500/50 hover:bg-neutral-900"
-        >
-          <div>
-            <p className="text-lg font-semibold">{user.name}&apos;s Board</p>
-            <p className="mt-1 text-sm text-neutral-400">
-              {myNoteCount} {myNoteCount === 1 ? "note" : "notes"}
+        {/* My Boards */}
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-neutral-300">My Boards</h2>
+          <CreateBoardButton ownerId={id} />
+        </div>
+
+        {myBoards.length === 0 ? (
+          <div className="mb-10 rounded-2xl border border-dashed border-neutral-800 p-8 text-center">
+            <p className="text-neutral-500">
+              You don&apos;t have any boards yet. Create one to get started!
             </p>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-purple-500 to-blue-500 text-sm font-bold">
-            {user.name.charAt(0).toUpperCase()}
+        ) : (
+          <div className="mb-10 flex flex-col gap-3">
+            {myBoards.map((board) => (
+              <div
+                key={board.id}
+                className="flex items-center justify-between rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 transition-all hover:border-purple-500/50 hover:bg-neutral-900"
+              >
+                <Link href={`/note/${board.id}`} className="flex-1">
+                  <p className="text-lg font-semibold">{board.name}</p>
+                  <p className="mt-1 text-sm text-neutral-400">
+                    {board._count.notes}{" "}
+                    {board._count.notes === 1 ? "note" : "notes"}
+                  </p>
+                </Link>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-purple-500 to-blue-500 text-sm font-bold">
+                    {board.name.charAt(0).toUpperCase()}
+                  </div>
+                  <DeleteBoardButton boardId={board.id} />
+                </div>
+              </div>
+            ))}
           </div>
-        </Link>
+        )}
 
         {/* Shared With Me */}
-        <h2 className="mb-4 mt-10 text-lg font-semibold text-neutral-300">
+        <h2 className="mb-4 text-lg font-semibold text-neutral-300">
           Shared with me
         </h2>
-        {sharedOwners.length === 0 ? (
+        {sharedWithMe.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-neutral-800 p-8 text-center">
             <p className="text-neutral-500">
               No boards have been shared with you yet.
@@ -90,20 +112,22 @@ export default async function DashboardPage({ params }: PageProps) {
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            {sharedOwners.map((owner) => (
+            {sharedWithMe.map((share) => (
               <Link
-                key={owner.id}
-                href={`/note/${owner.id}`}
+                key={share.id}
+                href={`/note/${share.board.id}`}
                 className="flex items-center justify-between rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 transition-all hover:border-blue-500/50 hover:bg-neutral-900"
               >
                 <div>
-                  <p className="text-lg font-semibold">
-                    {owner.name}&apos;s Board
+                  <p className="text-lg font-semibold">{share.board.name}</p>
+                  <p className="mt-1 text-sm text-neutral-400">
+                    by {share.board.owner.name} &middot;{" "}
+                    {share.board._count.notes}{" "}
+                    {share.board._count.notes === 1 ? "note" : "notes"}
                   </p>
-                  <p className="mt-1 text-sm text-neutral-400">{owner.email}</p>
                 </div>
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-cyan-500 text-sm font-bold">
-                  {owner.name.charAt(0).toUpperCase()}
+                  {share.board.owner.name.charAt(0).toUpperCase()}
                 </div>
               </Link>
             ))}
