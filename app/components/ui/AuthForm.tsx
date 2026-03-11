@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
@@ -43,33 +44,33 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-sm">
       {/* Header */}
       <div className="mb-8 text-center">
-        <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-purple-500 to-blue-500 text-2xl font-bold shadow-lg shadow-purple-500/20">
+        <div className="mb-4 inline-flex h-10 w-10 items-center justify-center border border-neutral-700 bg-neutral-900 text-lg font-bold text-red-500">
           S
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          {isLogin ? "Welcome back" : "Create your account"}
+        <h1 className="text-2xl font-bold tracking-tight text-white">
+          {isLogin ? "Welcome back" : "Create account"}
         </h1>
-        <p className="mt-2 text-neutral-400">
+        <p className="mt-2 text-xs text-neutral-500">
           {isLogin
             ? "Sign in to access your boards"
-            : "Get started with ShareBoard for free"}
+            : "Get started with ShareBoard"}
         </p>
       </div>
 
-      {/* Form Card */}
-      <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-8 shadow-2xl backdrop-blur-xl">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      {/* Form */}
+      <div className="border border-neutral-800 bg-neutral-900/60 p-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Name (signup only) */}
           {!isLogin && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="name"
-                className="text-sm font-medium text-neutral-300"
+                className="text-xs font-medium uppercase tracking-wider text-neutral-500"
               >
-                Full Name
+                Name
               </label>
               <input
                 id="name"
@@ -78,16 +79,16 @@ export default function AuthForm() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
                 required={!isLogin}
-                className="rounded-xl border border-neutral-700 bg-neutral-800/50 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50"
+                className="border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-neutral-600 focus:border-red-500"
               />
             </div>
           )}
 
           {/* Email */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             <label
               htmlFor="email"
-              className="text-sm font-medium text-neutral-300"
+              className="text-xs font-medium uppercase tracking-wider text-neutral-500"
             >
               Email
             </label>
@@ -98,15 +99,15 @@ export default function AuthForm() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
-              className="rounded-xl border border-neutral-700 bg-neutral-800/50 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50"
+              className="border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-neutral-600 focus:border-red-500"
             />
           </div>
 
           {/* Password */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             <label
               htmlFor="password"
-              className="text-sm font-medium text-neutral-300"
+              className="text-xs font-medium uppercase tracking-wider text-neutral-500"
             >
               Password
             </label>
@@ -118,56 +119,59 @@ export default function AuthForm() {
               placeholder="••••••••"
               required
               minLength={6}
-              className="rounded-xl border border-neutral-700 bg-neutral-800/50 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50"
+              className="border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-neutral-600 focus:border-red-500"
             />
           </div>
 
           {/* Error */}
           {error && (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            <div className="border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
               {error}
             </div>
           )}
 
           {/* Submit */}
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="mt-1 flex h-12 items-center justify-center rounded-xl bg-linear-to-r from-purple-600 to-blue-600 font-medium text-white shadow-lg shadow-purple-500/20 transition-all hover:from-purple-500 hover:to-blue-500 hover:shadow-purple-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-1 h-10 w-full bg-red-600 text-white hover:bg-red-500 disabled:opacity-50"
           >
             {loading ? (
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
             ) : isLogin ? (
               "Sign In"
             ) : (
               "Create Account"
             )}
-          </button>
+          </Button>
         </form>
 
         {/* Divider */}
-        <div className="my-6 flex items-center gap-4">
+        <div className="my-5 flex items-center gap-3">
           <div className="h-px flex-1 bg-neutral-800" />
-          <span className="text-xs text-neutral-500">OR</span>
+          <span className="text-[10px] uppercase tracking-widest text-neutral-600">
+            or
+          </span>
           <div className="h-px flex-1 bg-neutral-800" />
         </div>
 
         {/* Toggle */}
-        <button
+        <Button
+          variant="outline"
           onClick={() => {
             setIsLogin(!isLogin);
             setError("");
           }}
-          className="w-full rounded-xl border border-neutral-700 bg-neutral-800/30 py-3 text-sm font-medium text-neutral-300 transition-all hover:border-neutral-600 hover:bg-neutral-800/60 hover:text-white"
+          className="w-full border-neutral-800 text-neutral-400 hover:border-neutral-600 hover:text-white"
         >
           {isLogin
             ? "Don't have an account? Sign up"
             : "Already have an account? Sign in"}
-        </button>
+        </Button>
       </div>
 
       {/* Footer */}
-      <p className="mt-6 text-center text-xs text-neutral-600">
+      <p className="mt-4 text-center text-[10px] text-neutral-700">
         By continuing, you agree to our Terms of Service
       </p>
     </div>
