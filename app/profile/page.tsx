@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import ProfileClient from "./ProfileClient";
 
 export default async function ProfilePage() {
   const cookieStore = await cookies();
@@ -10,15 +11,19 @@ export default async function ProfilePage() {
     redirect("/");
   }
 
-  const user = prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
+      id: true,
       name: true,
       email: true,
-      password: true,
       profilePicture: true,
     },
   });
+
+  if (!user) {
+    redirect("/");
+  }
 
   //friends stuff
   // people i share my board with
