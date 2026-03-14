@@ -1,16 +1,8 @@
 "use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
-
-interface Friend {
-  id: string;
-  name: string;
-  email: string;
-  profilePicture: string | null;
-}
 
 interface ProfileUser {
   id: string;
@@ -19,13 +11,7 @@ interface ProfileUser {
   profilePicture: string | null;
 }
 
-export default function ProfileClient({
-  user,
-  friends,
-}: {
-  user: ProfileUser;
-  friends: Friend[];
-}) {
+export default function ProfileClient({ user }: { user: ProfileUser }) {
   const router = useRouter();
 
   // Password state
@@ -279,48 +265,6 @@ export default function ProfileClient({
               </Button>
             </form>
           </div>
-        </section>
-
-        {/* Friends Section */}
-        <section>
-          <h2 className="mb-5 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            Friends ({friends.length})
-          </h2>
-          {friends.length === 0 ? (
-            <div className="border border-dashed border-border p-8 text-center">
-              <p className="text-sm text-muted-foreground">
-                No friends yet. Share a board with someone to add them as a
-                friend.
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {friends.map((friend) => (
-                <div
-                  key={friend.id}
-                  className="flex items-center gap-4 border border-border bg-card px-5 py-4"
-                >
-                  <Avatar>
-                    {friend.profilePicture ? (
-                      <AvatarImage
-                        src={friend.profilePicture}
-                        alt={friend.name}
-                      />
-                    ) : null}
-                    <AvatarFallback>
-                      {friend.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium">{friend.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {friend.email}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </section>
       </main>
     </div>

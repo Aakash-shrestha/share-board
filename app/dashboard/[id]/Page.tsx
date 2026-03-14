@@ -4,9 +4,17 @@ import CreateBoardMenu from "@/app/components/ui/CreateBoardButton";
 import DeleteBoardButton from "@/app/components/ui/DeleteBoardButton";
 import SharedBoardsList from "@/app/components/ui/SharedBoardsList";
 import ShareDialog from "@/app/components/ui/ShareDialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+}
+
+interface Friend {
+  id: string;
+  name: string;
+  email: string;
+  profilePicture: string | null;
 }
 
 export default async function DashboardPage({ params }: PageProps) {
@@ -55,6 +63,57 @@ export default async function DashboardPage({ params }: PageProps) {
     ownerName: share.board.owner.name,
     noteCount: share.board._count.notes,
   }));
+
+  //friends stuff
+  // people i share my board with
+  const myBoardShares = await prisma.boardShare.findMany({
+    where: {
+      board: { ownerId: user.id },
+    },
+    include: {
+      sharedWith: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          profilePicture: true,
+        },
+      },
+    },
+  });
+
+  const sharedWithMeFriends = await prisma.boardShare.findMany({
+    where: { sharedWithId: user.id },
+    include: {
+      board: {
+        include: {
+          owner: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              profilePicture: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const friendsMap = new Map<
+    string,
+    { id: string; name: string; email: string; profilePicture: string | null }
+  >();
+
+  for (const share of myBoardShares) {
+    friendsMap.set(share.sharedWith.id, share.sharedWith);
+  }
+  for (const share of sharedWithMeFriends) {
+    friendsMap.set(share.board.owner.id, share.board.owner);
+  }
+
+  const friends = Array.from(friendsMap.values());
+  console.log("Friends:", friends);
 
   return (
     <div className="relative min-h-screen bg-white">
@@ -138,6 +197,48 @@ export default async function DashboardPage({ params }: PageProps) {
           Shared with me
         </h2>
         <SharedBoardsList userId={id} initialBoards={sharedBoards} />
+
+        {/* Friends Section */}
+        <section className="mt-12">
+          <h2 className="mb-5 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+            Friends ({friends.length})
+          </h2>
+          {friends.length === 0 ? (
+            <div className="border border-dashed border-border p-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                No friends yet. Share a board with someone to add them as a
+                friend.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {friends.map((friend) => (
+                <div
+                  key={friend.id}
+                  className="flex items-center gap-4 border border-border bg-card px-5 py-4"
+                >
+                  <Avatar>
+                    {friend.profilePicture ? (
+                      <AvatarImage
+                        src={friend.profilePicture}
+                        alt={friend.name}
+                      />
+                    ) : null}
+                    <AvatarFallback>
+                      {friend.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium">{friend.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {friend.email}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );
