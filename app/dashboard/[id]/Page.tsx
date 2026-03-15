@@ -5,6 +5,14 @@ import DeleteBoardButton from "@/app/components/ui/DeleteBoardButton";
 import SharedBoardsList from "@/app/components/ui/SharedBoardsList";
 import ShareDialog from "@/app/components/ui/ShareDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -123,13 +131,40 @@ export default async function DashboardPage({ params }: PageProps) {
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-xs text-muted-foreground">{user.email}</span>
-            <Link
+            <span className="text-xs text-muted-foreground">{user.name}</span>
+            <span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="cursor-pointer rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring">
+                    <Avatar>
+                      <AvatarImage
+                        src={user.profilePicture || undefined}
+                        alt="user profile pricture"
+                        className="grayscale"
+                      />
+                      <AvatarFallback>{user.name[0]}</AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile">Settings</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild variant="destructive">
+                    <Link href="/">Logout</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </span>
+            {/*<Link
               href="/"
               className="border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
             >
               Logout
-            </Link>
+            </Link>*/}
           </div>
         </div>
       </header>

@@ -17,6 +17,12 @@ export default async function NotePage({ params }: PageProps) {
     redirect("/");
   }
 
+  //find the detail about current user using the currentUserId
+  const currentUser = await prisma.user.findUnique({
+    where: { id: currentUserId },
+    select: { profilePicture: true },
+  });
+
   const board = await prisma.board.findUnique({
     where: { id: boardId },
     include: {
@@ -53,6 +59,7 @@ export default async function NotePage({ params }: PageProps) {
         noteCount={board.notes.length}
         currentUserId={currentUserId}
         sharedUsers={sharedUsers}
+        currentUserProfilePicture={currentUser?.profilePicture || null}
       />
     </div>
   );

@@ -86,6 +86,7 @@ export default function Nodes({
   noteCount,
   currentUserId,
   sharedUsers,
+  currentUserProfilePicture,
 }: {
   notes: Note[];
   noteEdges: NoteEdge[];
@@ -96,6 +97,7 @@ export default function Nodes({
   noteCount: number;
   currentUserId: string;
   sharedUsers: SharedUser[];
+  currentUserProfilePicture: string | null;
 }) {
   const [nodes, setNodes] = useState<Node[]>(notesToNodes(notes, boardId));
   const [edges, setEdges] = useState<Edge[]>(noteEdgesToEdges(noteEdges));
@@ -414,8 +416,8 @@ export default function Nodes({
             <button className="cursor-pointer rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring">
               <Avatar>
                 <AvatarImage
-                  src="https://github.com/shadcn.png"
-                  alt="@shadcn"
+                  src={currentUserProfilePicture || undefined}
+                  alt="user profile pricture"
                   className="grayscale"
                 />
                 <AvatarFallback>A</AvatarFallback>
