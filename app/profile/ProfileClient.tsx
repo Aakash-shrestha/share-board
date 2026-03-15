@@ -80,14 +80,13 @@ export default function ProfileClient({ user }: { user: ProfileUser }) {
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) {
-      return;
-    }
+    if (!file) return;
+
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.set("file", file);
-      formData.set("userId", user.id);
+      formData.append("file", file);
+      formData.append("userId", user.id);
 
       const res = await fetch("/api/profile/picture", {
         method: "POST",
@@ -95,6 +94,7 @@ export default function ProfileClient({ user }: { user: ProfileUser }) {
       });
 
       const data = await res.json();
+
       if (res.ok) {
         setProfilePicture(data.profilePicture);
       }
@@ -113,6 +113,7 @@ export default function ProfileClient({ user }: { user: ProfileUser }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id }),
       });
+
       if (res.ok) {
         setProfilePicture(null);
       }

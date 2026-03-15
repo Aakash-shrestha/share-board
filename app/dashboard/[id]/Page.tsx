@@ -10,13 +10,6 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-interface Friend {
-  id: string;
-  name: string;
-  email: string;
-  profilePicture: string | null;
-}
-
 export default async function DashboardPage({ params }: PageProps) {
   const { id } = await params;
 
@@ -215,24 +208,32 @@ export default async function DashboardPage({ params }: PageProps) {
               {friends.map((friend) => (
                 <div
                   key={friend.id}
-                  className="flex items-center gap-4 border border-border bg-card px-5 py-4"
+                  className="flex flex-column justify-between border border-border bg-card px-5 py-4"
                 >
-                  <Avatar>
-                    {friend.profilePicture ? (
-                      <AvatarImage
-                        src={friend.profilePicture}
-                        alt={friend.name}
-                      />
-                    ) : null}
-                    <AvatarFallback>
-                      {friend.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="flex items-center gap-4 ">
+                    <Avatar>
+                      {friend.profilePicture ? (
+                        <AvatarImage
+                          src={friend.profilePicture}
+                          alt={friend.name}
+                        />
+                      ) : null}
+                      <AvatarFallback>
+                        {friend.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium">{friend.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {friend.email}
+                      </p>
+                    </div>
+                  </div>
                   <div>
-                    <p className="text-sm font-medium">{friend.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {friend.email}
-                    </p>
+                    {sharedWithMe
+                      .filter((b) => b.sharedWithId === friend.id)
+                      .map((b) => b.board.name)
+                      .join(", ")}
                   </div>
                 </div>
               ))}
