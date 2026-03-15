@@ -30,10 +30,10 @@ export async function POST(req: Request) {
       .map((n) => `Title: ${n.title}\nContent: ${n.content}`)
       .join("\n\n---\n\n");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
     const prompt = `You are a helpful assistant. Please summarize the following notes from a digital whiteboard.
        Provide a concise, well-structured summary with key takeaways or action items if applicable.
-       Format the output in clean text or markdown.\n\n${textToSummarize}`;
+       Format the output in clean text or markdown. Return the text in non-markdown format\n\n${textToSummarize}`;
     const result = await model.generateContent(prompt);
     const summary = result.response.text();
     return NextResponse.json({ summary });

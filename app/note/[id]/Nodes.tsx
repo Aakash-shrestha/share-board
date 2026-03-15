@@ -40,6 +40,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getSocket } from "@/lib/socket";
+import SummarizeButton from "@/app/components/ui/SummarizeButton";
 
 const nodeTypes = {
   textUpdater: TextUpdaterNode,
@@ -401,6 +402,7 @@ export default function Nodes({
   return (
     <div className="w-full h-full bg-white">
       <div className="absolute top-4 right-4 z-10 flex gap-2">
+        <SummarizeButton boardId={boardId} />
         <Button onClick={addNote}>+ Add Note</Button>
         <ShareDialog
           boardId={boardId}
