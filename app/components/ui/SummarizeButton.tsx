@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function SummarizeButton({ boardId }: { boardId: string }) {
@@ -18,7 +18,7 @@ export default function SummarizeButton({ boardId }: { boardId: string }) {
   const [open, setOpen] = useState(false);
 
   const handleSummarize = async () => {
-    if (!open) return; // Only run when opening
+    // if (!open) return; // Only run when opening
 
     setLoading(true);
     setSummary("");
@@ -45,44 +45,44 @@ export default function SummarizeButton({ boardId }: { boardId: string }) {
   };
 
   return (
-    <Dialog
+    <Drawer
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
         if (isOpen && !summary) handleSummarize();
       }}
     >
-      <DialogTrigger asChild>
+      <DrawerTrigger asChild>
         <Button variant="secondary" className="border-2 border-gray-600">
           ✨ AI Summary
         </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      </DrawerTrigger>
+      <DrawerContent className="max-w-2xl mx-auto h-[80vh]">
+        <DrawerHeader>
+          <DrawerTitle className="flex items-center gap-2">
             ✨ Board Summary
-          </DialogTitle>
-          <DialogDescription>
+          </DrawerTitle>
+          <DrawerDescription>
             AI-generated summary of all the notes on this board.
-          </DialogDescription>
-        </DialogHeader>
+          </DrawerDescription>
+        </DrawerHeader>
 
-        <ScrollArea className="h-100 w-full rounded-md border p-4 bg-muted/30">
+        <ScrollArea className="flex-1 w-full rounded-md border p-4 bg-muted/30 mx-4 mt-2">
           {loading ? (
-            <div className="flex h-full items-center justify-center flex-col gap-3 text-muted-foreground">
+            <div className="flex h-full items-center justify-center flex-col gap-3 text-muted-foreground py-10">
               <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-indigo-600"></div>
               <p className="text-sm animate-pulse">
                 AI is reading your notes...
               </p>
             </div>
           ) : (
-            <div className="text-sm leading-relaxed whitespace-pre-wrap">
+            <div className="text-sm leading-relaxed whitespace-pre-wrap px-2">
               {summary}
             </div>
           )}
         </ScrollArea>
 
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end p-4 mb-4">
           <Button
             variant="outline"
             onClick={handleSummarize}
@@ -91,7 +91,7 @@ export default function SummarizeButton({ boardId }: { boardId: string }) {
             Regenerate
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </DrawerContent>
+    </Drawer>
   );
 }
