@@ -410,6 +410,7 @@ export default function Nodes({
           boardName={boardName}
           ownerName={boardOwnerName}
           noteCount={noteCount}
+          currentUserId={currentUserId}
           initialSharedUsers={sharedUsers}
         />
 

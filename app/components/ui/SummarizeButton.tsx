@@ -39,9 +39,7 @@ export default function SummarizeButton({ boardId }: { boardId: string }) {
         setSummary("Failed to generate summary. Please try again.");
       }
     } catch (error) {
-      setSummary(
-        "An error occurred while connecting to the AI. " + error.message,
-      );
+      setSummary("An error occurred while connecting to the AI. " + { error });
     } finally {
       setLoading(false);
     }

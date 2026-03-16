@@ -30,6 +30,7 @@ export default function ShareDialog({
   boardName,
   ownerName,
   noteCount,
+  currentUserId,
   initialSharedUsers,
 }: {
   boardId: string;
@@ -37,6 +38,7 @@ export default function ShareDialog({
   boardName: string;
   ownerName: string;
   noteCount: number;
+  currentUserId: string;
   initialSharedUsers: SharedUser[];
 }) {
   const [query, setQuery] = useState("");
@@ -121,6 +123,8 @@ export default function ShareDialog({
     });
   };
 
+  const isOwner = currentUserId === boardOwnerId;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -163,8 +167,10 @@ export default function ShareDialog({
                   </div>
                   {alreadyShared ? (
                     <span className="text-xs text-green-600">Shared</span>
-                  ) : (
+                  ) : isOwner ? (
                     <span className="text-xs text-blue-600">+ Add</span>
+                  ) : (
+                    <div></div>
                   )}
                 </DropdownMenuItem>
               );
@@ -196,12 +202,14 @@ export default function ShareDialog({
                   </p>
                   <p className="text-xs text-neutral-500">{user.email}</p>
                 </div>
-                <button
-                  onClick={() => removeShare(user.id)}
-                  className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
-                >
-                  Remove
-                </button>
+                {isOwner && (
+                  <button
+                    onClick={() => removeShare(user.id)}
+                    className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
             ))}
           </div>

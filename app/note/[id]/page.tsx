@@ -11,7 +11,7 @@ export default async function NotePage({ params }: PageProps) {
   const { id: boardId } = await params;
 
   const cookieStore = await cookies();
-  const currentUserId = (await cookieStore.get("userId"))?.value;
+  const currentUserId = cookieStore.get("userId")?.value;
 
   if (!currentUserId) {
     redirect("/");
