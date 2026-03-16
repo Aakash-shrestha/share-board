@@ -199,6 +199,11 @@ export default function ShareDialog({
                 <div>
                   <p className="text-sm font-medium text-neutral-900">
                     {user.name}
+                    {user.id === currentUserId && (
+                      <span className="text-neutral-400 font-normal ml-1">
+                        (me)
+                      </span>
+                    )}
                   </p>
                   <p className="text-xs text-neutral-500">{user.email}</p>
                 </div>
