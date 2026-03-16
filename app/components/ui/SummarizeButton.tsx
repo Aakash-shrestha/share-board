@@ -11,6 +11,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SparkleIcon } from "@phosphor-icons/react/dist/ssr";
 
 export default function SummarizeButton({ boardId }: { boardId: string }) {
   const [summary, setSummary] = useState<string>("");
@@ -38,7 +39,9 @@ export default function SummarizeButton({ boardId }: { boardId: string }) {
         setSummary("Failed to generate summary. Please try again.");
       }
     } catch (error) {
-      setSummary("An error occurred while connecting to the AI.");
+      setSummary(
+        "An error occurred while connecting to the AI. " + error.message,
+      );
     } finally {
       setLoading(false);
     }
@@ -54,35 +57,37 @@ export default function SummarizeButton({ boardId }: { boardId: string }) {
     >
       <DrawerTrigger asChild>
         <Button variant="secondary" className="border-2 border-gray-600">
-          ✨ AI Summary
+          <SparkleIcon /> AI Summary
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-w-2xl mx-auto h-[80vh]">
-        <DrawerHeader>
+      <DrawerContent className="mx-auto max-w-2xl max-h-[85vh] flex flex-col">
+        <DrawerHeader className="shrink-0">
           <DrawerTitle className="flex items-center gap-2">
-            ✨ Board Summary
+            <SparkleIcon /> Board Summary
           </DrawerTitle>
           <DrawerDescription>
             AI-generated summary of all the notes on this board.
           </DrawerDescription>
         </DrawerHeader>
 
-        <ScrollArea className="flex-1 w-full rounded-md border p-4 bg-muted/30 mx-4 mt-2">
-          {loading ? (
-            <div className="flex h-full items-center justify-center flex-col gap-3 text-muted-foreground py-10">
-              <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-indigo-600"></div>
-              <p className="text-sm animate-pulse">
-                AI is reading your notes...
-              </p>
-            </div>
-          ) : (
-            <div className="text-sm leading-relaxed whitespace-pre-wrap px-2">
-              {summary}
-            </div>
-          )}
-        </ScrollArea>
+        <div className="flex-1 overflow-hidden px-4 py-2">
+          <ScrollArea className="h-full w-full rounded-md border p-4 bg-muted/30">
+            {loading ? (
+              <div className="flex h-full items-center justify-center flex-col gap-3 text-muted-foreground py-10">
+                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-indigo-600"></div>
+                <p className="text-sm animate-pulse">
+                  AI is reading your notes...
+                </p>
+              </div>
+            ) : (
+              <div className="text-sm leading-relaxed whitespace-pre-wrap px-2">
+                {summary}
+              </div>
+            )}
+          </ScrollArea>
+        </div>
 
-        <div className="flex justify-end p-4 mb-4">
+        <div className="flex shrink-0 justify-end p-4 mb-4">
           <Button
             variant="outline"
             onClick={handleSummarize}

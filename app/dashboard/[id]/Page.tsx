@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import RemoveFriendButton from "@/app/components/ui/RemoveFriendButton";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -265,10 +266,7 @@ export default async function DashboardPage({ params }: PageProps) {
                     </div>
                   </div>
                   <div>
-                    {sharedWithMe
-                      .filter((b) => b.sharedWithId === friend.id)
-                      .map((b) => b.board.name)
-                      .join(", ")}
+                    <RemoveFriendButton userId={id} friendId={friend.id} />
                   </div>
                 </div>
               ))}
