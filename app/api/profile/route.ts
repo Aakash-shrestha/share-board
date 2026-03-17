@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import bcrypt from "bcrypt";
+import { match } from "node:assert";
 
 export async function PATCH(req: Request) {
   try {
@@ -30,17 +32,22 @@ export async function PATCH(req: Request) {
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-
-    if (user.password !== body.currentPassword) {
+    const matchCurrentPassword = await bcrypt.compare(
+      user.password,
+      body.currentPassword,
+    );
+    if (!matchCurrentPassword) {
       return NextResponse.json(
         { error: "Current password is incorrect" },
         { status: 401 },
       );
     }
 
+    const newHashedPassword = await bcrypt.hash(user.password, 10);
+
     await prisma.user.update({
       where: { id: body.userId },
-      data: { password: body.newPassword },
+      data: { password: newHashedPassword },
     });
 
     return NextResponse.json({ success: true });
